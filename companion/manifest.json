@@ -1,0 +1,26 @@
+{
+	"id": "livelogix-cadence",
+	"name": "livelogix-cadence",
+	"shortname": "Cadence",
+	"description": "Control LiveLogix Cadence timers, presets, schedules, cue stacks, polls and cue lights — with live time, status and tally feedback.",
+	"version": "1.1.0",
+	"license": "MIT",
+	"repository": "https://github.com/livelogix/companion-module-livelogix-cadence",
+	"bugs": "https://github.com/livelogix/companion-module-livelogix-cadence/issues",
+	"maintainers": [
+		{
+			"name": "LiveLogix",
+			"email": "support@livelogix.app"
+		}
+	],
+	"legacyIds": ["geertech-cadence"],
+	"runtime": {
+		"type": "node22",
+		"api": "nodejs-ipc",
+		"apiVersion": "1.14.1",
+		"entrypoint": "../main.js"
+	},
+	"manufacturer": "LiveLogix",
+	"products": ["Cadence"],
+	"keywords": ["timer", "countdown", "stage", "clock", "cue", "production", "presenter", "poll"]
+}

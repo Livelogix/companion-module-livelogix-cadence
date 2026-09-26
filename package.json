@@ -1,0 +1,16 @@
+{
+	"name": "companion-module-livelogix-cadence",
+	"version": "1.1.0",
+	"main": "main.js",
+	"type": "commonjs",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"test": "node --test \"test/*.test.js\"",
+		"smoke": "node test-harness.js",
+		"format": "prettier -w ."
+	},
+	"dependencies": {
+		"@companion-module/base": "^1.11.0"
+	}
+}

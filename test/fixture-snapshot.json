@@ -1,0 +1,173 @@
+{
+	"clockStatus": "NTP locked · offset +1.2 ms",
+	"now": 1790427564.5,
+	"page": { "title": "Stage Manager", "columns": 0, "adjust": [-60, 60], "gridCols": 6, "gridRows": 8 },
+	"undoScene": "scene-1",
+	"undoRemaining": 42.3,
+	"clocks": [
+		{
+			"id": "timer-A",
+			"name": "Keynote",
+			"kind": "countdown",
+			"primary": "0:12",
+			"secondary": "Keynote",
+			"mood": "danger",
+			"colorHex": "#FF594F",
+			"controllable": true,
+			"running": true,
+			"remaining": 12.4,
+			"duration": 600,
+			"progress": 0.979,
+			"endTime": "4:06 PM",
+			"undo": 31.2,
+			"presets": [300, null, 900, null]
+		},
+		{
+			"id": "timer-B",
+			"name": "Panel",
+			"kind": "countdown",
+			"primary": "20:00",
+			"mood": "normal",
+			"colorHex": "#FFFFFF",
+			"controllable": true,
+			"running": false,
+			"remaining": 1200,
+			"duration": 1200,
+			"progress": 0,
+			"rate": 0.9
+		},
+		{
+			"id": "till-1",
+			"name": "Doors",
+			"kind": "countdown",
+			"primary": "14:55",
+			"mood": "normal",
+			"running": true,
+			"remaining": 895,
+			"anchored": true,
+			"tillSecs": 57600
+		},
+		{
+			"id": "tod-1",
+			"name": "Time of Day",
+			"kind": "timeOfDay",
+			"primary": "4:05 PM",
+			"mood": "normal"
+		},
+		{
+			"id": "pp-1",
+			"name": "ProPresenter",
+			"kind": "propresenter",
+			"primary": "3:10",
+			"mood": "normal",
+			"ppControl": true
+		}
+	],
+	"shifts": [{ "id": "shift-1", "name": "Rehearsal", "rate": 0.9 }],
+	"cueLights": [{ "id": "cue-1", "name": "Stage L", "colorHex": "#FF594F" }],
+	"presetBanks": [
+		{
+			"id": "bank-1",
+			"name": "Talks",
+			"selected": "11111111-1111-1111-1111-111111111111",
+			"canApply": true,
+			"timerCount": 1,
+			"presets": [
+				{ "id": "11111111-1111-1111-1111-111111111111", "label": "Short", "time": "5:00" },
+				{ "id": "22222222-2222-2222-2222-222222222222", "label": "Long", "time": "20:00" }
+			]
+		}
+	],
+	"schedules": [
+		{
+			"id": "sched-1",
+			"name": "Day 1",
+			"currentLabel": "Cue 3 · Welcome",
+			"onDeckLabel": "Cue 4 · Keynote",
+			"onDeckTime": "9:15 AM",
+			"onDeckDuration": "45:00",
+			"nextLabel": "Cue 5 · Break",
+			"nextTime": "10:00 AM",
+			"position": "4 / 12",
+			"onDeckIndex": 3,
+			"canSet": true,
+			"canPrev": true,
+			"canNext": true,
+			"timerCount": 1,
+			"timers": [],
+			"statusLine": "Ends 5:40 PM · 5:00 behind",
+			"driftSeconds": 300,
+			"cues": [],
+			"canUpload": false,
+			"canRefresh": true,
+			"syncMarker": "Updated 9:02:11 AM",
+			"runningLabel": "Cue 3 · Welcome",
+			"onDeckIsRunning": false
+		}
+	],
+	"schedulers": [
+		{
+			"id": "schr-1",
+			"name": "TC Triggers",
+			"armed": false,
+			"liveTC": "01:02:03:04",
+			"nextTitle": "Walk-in",
+			"nextTrigger": "01:05:00:00",
+			"rowCount": 3,
+			"canFire": true,
+			"twelveHour": true,
+			"rows": [],
+			"tcClocks": [],
+			"timers": [],
+			"banks": []
+		}
+	],
+	"scenes": [{ "id": "scene-1", "name": "Keynote Look", "ready": true, "missing": 0 }],
+	"messages": [{ "id": "msg-1", "name": "Wrap", "text": "Please wrap up", "vis": "hidden" }],
+	"automations": [
+		{
+			"id": "auto-1",
+			"name": "Doors",
+			"hour": 16,
+			"minute": 0,
+			"second": 0,
+			"armed": true,
+			"repeats": false,
+			"twelveHour": true,
+			"timeLabel": "4:00:00 PM",
+			"countdown": 12.5
+		}
+	],
+	"cueStacks": [
+		{
+			"id": "src-uuid",
+			"name": "Keynote stack",
+			"clock": "timer-A",
+			"running": true,
+			"limit": 5,
+			"cues": [
+				{ "id": "c1", "seconds": 300, "label": "Q&A" },
+				{ "id": "c2", "seconds": 120, "label": null }
+			]
+		}
+	],
+	"polls": [
+		{
+			"id": "poll-1",
+			"name": "Lunch vote",
+			"question": "What’s for lunch?",
+			"options": ["Sushi", "Tacos", "Pizza"],
+			"counts": [14, 20, 3],
+			"percents": [38, 54, 8],
+			"total": 37,
+			"audience": 42,
+			"state": "open",
+			"revealed": false,
+			"results": "afterVote",
+			"index": 2,
+			"count": 5,
+			"joinURL": "https://remote.cadence.livelogix.app/v/ABC123",
+			"live": true
+		}
+	]
+}
