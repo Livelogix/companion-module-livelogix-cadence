@@ -155,6 +155,9 @@ const ENTITY_VARS = [
 			['leader_percent', 'leading answer %', (p) => leaderPercent(p)],
 			['revealed', 'revealed on screen (yes/no)', (p) => yesNo(p.revealed)],
 			['join_url', 'voting link', (p) => p.joinURL || ''],
+			// While simulating, votes/leader above are the FAKE tally.
+			['simulating', 'showing simulated votes (yes/no)', (p) => yesNo(p.simulating)],
+			['sim_state', 'simulation (off / ready / open / closed)', (p) => (p.simulating ? p.simState || 'on' : 'off')],
 		],
 	],
 ]

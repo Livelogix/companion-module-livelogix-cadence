@@ -42,6 +42,7 @@ Every timer action has an **override ID** field that accepts variables.
 - **Automation:** Arm / Disarm / Toggle; Set trigger time.
 - **Cue Stack:** GO / Load / Remove top / Clear; Add a time.
 - **Poll:** Open / Close / Toggle / Ready / Next / Previous / Reveal / Hide / Toggle reveal / Reset votes; Go to question #; Results on phones (never / after voting / live).
+- **Poll — Simulate votes (rehearsal):** Start / Stop / Toggle; reveal, hide or toggle the simulated results; set the simulated voting state (ready / open / closed). Fake votes stream in for about 5 s, then reveal, so you can rehearse the graphics. Real votes are never touched, and phones mark the tally "simulated". If Simulate is switched off for the Producer page, Cadence refuses and the connection log says so.
 - **Time Shift:** set rehearsal rate (1 = real time).
 - **ProPresenter:** Start / Stop / Reset a ProPresenter timer (clock in control mode).
 
@@ -55,7 +56,7 @@ Every timer action has an **override ID** field that accepts variables.
 - **Scheduler armed**, **Automation armed**, **Automation fires within a minute**.
 - **Scene recall can be undone**, **Message on-air state**.
 - **Cue Stack has cues**.
-- **Poll state** (ready / open / closed), **Poll revealed**, **Poll room live**.
+- **Poll state** (ready / open / closed), **Poll revealed**, **Poll room live**, **Poll is simulating** (any phase / votes streaming / simulated results revealed).
 - **Time Shift active**, **Cadence offline**.
 
 ## Variables
@@ -68,11 +69,11 @@ Every timer action has an **override ID** field that accepts variables.
 - **Automation:** `automation_<id>_armed`, `_time`, `_countdown`
 - **Message:** `message_<id>_text`, `_vis` · **Scene:** `scene_<id>_ready`
 - **Cue Stack (by timer id):** `cuestack_<id>_count`, `_next`
-- **Poll:** `poll_<id>_question`, `_state`, `_position`, `_votes`, `_audience`, `_leader`, `_leader_percent`, `_revealed`, `_join_url`
+- **Poll:** `poll_<id>_question`, `_state`, `_position`, `_votes`, `_audience`, `_leader`, `_leader_percent`, `_revealed`, `_join_url`, `_simulating`, `_sim_state` (while simulating, `_votes` / `_leader` show the fake tally)
 - **Time Shift:** `shift_<id>_rate` · **Cue light:** `cuelight_<id>_color`
 
 While Cadence is unreachable, live times read `--:--` rather than freezing on a stale value.
 
 ## Presets
 
-Ready-made buttons for everything on the page: per timer (Start/Pause with live time and state colours, on-screen-colour mirror, Reset, ±1:00, Undo), per schedule (GO on-deck, Next, Prev, ahead/behind readout), per cue stack (GO with count), per poll (Open/Close, Reveal, Next/Prev, leader readout), messages, scenes, automations, schedulers, presets, Time Shift rates, ProPresenter controls, cue-light tallies and a status button.
+Ready-made buttons for everything on the page: per timer (Start/Pause with live time and state colours, on-screen-colour mirror, Reset, ±1:00, Undo), per schedule (GO on-deck, Next, Prev, ahead/behind readout), per cue stack (GO with count), per poll (Open/Close, Reveal, Next/Prev, Simulate start/stop, simulated reveal, leader readout), messages, scenes, automations, schedulers, presets, Time Shift rates, ProPresenter controls, cue-light tallies and a status button.

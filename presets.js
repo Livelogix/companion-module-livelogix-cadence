@@ -140,7 +140,24 @@ function setPresets(self) {
 			act('poll_control', { poll: p.id, action: 'pollNext' }),
 		])
 		presets[`poll_${k}_prev`] = button(cat, 'Previous question', 'PREV Q', [act('poll_control', { poll: p.id, action: 'pollPrev' })])
-		presets[`poll_${k}_leader`] = button(cat, 'Leading answer readout', `${v(`poll_${k}_leader`)}\\n${v(`poll_${k}_leader_percent`)}%`, [])
+		presets[`poll_${k}_simulate`] = button(
+			cat,
+			'Simulate votes (start / stop)',
+			`SIMULATE\\n${v(`poll_${k}_sim_state`)}`,
+			[act('poll_simulate', { poll: p.id, action: 'toggle' })],
+			[
+				{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'simulating' }, style: { bgcolor: AMBER, color: BLACK } },
+				{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'streaming' }, style: { bgcolor: GREEN, color: WHITE } },
+			],
+		)
+		presets[`poll_${k}_sim_reveal`] = button(
+			cat,
+			'Simulated results: reveal / hide',
+			'SIM\\nREVEAL',
+			[act('poll_simulate', { poll: p.id, action: 'toggleReveal' })],
+			[{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'revealed' }, style: { bgcolor: BLUE, color: WHITE } }],
+		)
+		presets[`poll_${k}_leader`] =button(cat, 'Leading answer readout', `${v(`poll_${k}_leader`)}\\n${v(`poll_${k}_leader_percent`)}%`, [])
 	}
 
 	// ---- Messages -----------------------------------------------------------------------------

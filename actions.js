@@ -529,6 +529,55 @@ function setActions(self) {
 		},
 	}
 
+	// Simulate votes: a local rehearsal — ~5 s of weighted fake votes stream into
+	// the current question, then reveal. Real votes are untouched; phones show the
+	// fake tally marked "simulated". Cadence refuses it on pages with Simulate off.
+	actions.poll_simulate = {
+		name: 'Poll: Simulate votes (rehearsal)',
+		description: 'Stream fake votes into the current question to rehearse the graphics. Real votes are never touched.',
+		options: [
+			picker('poll', 'Poll', self.pollChoices()),
+			select('action', 'Action', 'toggle', [
+				['start', 'Start simulating (fake votes stream, then reveal)'],
+				['stop', 'Stop — back to the real results'],
+				['toggle', 'Toggle start / stop'],
+				['reveal', 'Reveal simulated results'],
+				['hide', 'Hide simulated results'],
+				['toggleReveal', 'Toggle simulated reveal'],
+				['open', 'Simulated voting: open'],
+				['close', 'Simulated voting: closed (stops the stream)'],
+				['ready', 'Simulated voting: ready'],
+			]),
+		],
+		callback: async (event) => {
+			const poll = event.options.poll
+			if (!poll) return
+			const p = self.findById('polls', poll)
+			switch (event.options.action) {
+				case 'start':
+					return self.sendCommand({ action: 'pollSimulate', poll })
+				case 'stop':
+					return self.sendCommand({ action: 'pollSimStop', poll })
+				case 'toggle':
+					return self.sendCommand({ action: p?.simulating ? 'pollSimStop' : 'pollSimulate', poll })
+				case 'reveal':
+					return self.sendCommand({ action: 'pollSimReveal', poll, on: true })
+				case 'hide':
+					return self.sendCommand({ action: 'pollSimReveal', poll, on: false })
+				case 'toggleReveal':
+					return self.sendCommand({ action: 'pollSimReveal', poll, on: !p?.simRevealed })
+				case 'open':
+				case 'close':
+				case 'ready':
+					return self.sendCommand({
+						action: 'pollSimState',
+						poll,
+						mode: event.options.action === 'close' ? 'closed' : event.options.action,
+					})
+			}
+		},
+	}
+
 	self.setActionDefinitions(actions)
 }
 

@@ -308,6 +308,28 @@ function setFeedbacks(self) {
 		(fb) => !!self.findById('polls', fb.options.poll)?.live,
 	)
 
+	f.poll_simulating = bool(
+		'Poll is simulating',
+		'True while the poll shows simulated (fake) votes — optionally only while they stream in, or while revealed.',
+		AMBER,
+		BLACK,
+		[
+			picker('poll', 'Poll', self.pollChoices()),
+			select('when', 'When', 'simulating', [
+				['simulating', 'Simulating (any phase)'],
+				['streaming', 'Fake votes streaming in'],
+				['revealed', 'Simulated results revealed'],
+			]),
+		],
+		(fb) => {
+			const p = self.findById('polls', fb.options.poll)
+			if (!p?.simulating) return false
+			if (fb.options.when === 'streaming') return !!p.simStreaming
+			if (fb.options.when === 'revealed') return !!p.simRevealed
+			return true
+		},
+	)
+
 	// ---- Connection -------------------------------------------------------------------
 	f.offline = bool(
 		'Cadence offline',

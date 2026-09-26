@@ -2,7 +2,9 @@
 // snapshot at GET /api/state and records every POST /api/command body.
 const http = require('node:http')
 
-function startMockCadence(snapshot) {
+// `reject(cmd)` may return an error string to answer {ok:false, error} the way
+// Cadence refuses a command (e.g. Simulate switched off for the page).
+function startMockCadence(snapshot, { reject } = {}) {
 	const commands = []
 	let current = snapshot
 	const server = http.createServer((req, res) => {
@@ -18,7 +20,8 @@ function startMockCadence(snapshot) {
 				try {
 					const cmd = JSON.parse(body)
 					commands.push(cmd)
-					send(200, { ok: true })
+					const error = reject?.(cmd)
+					send(200, error ? { ok: false, error } : { ok: true })
 				} catch (e) {
 					send(200, { ok: false, error: 'bad json' })
 				}
