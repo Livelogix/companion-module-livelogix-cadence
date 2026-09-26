@@ -3,17 +3,19 @@
 // every declared variable gets a value. Read-only — the only command sent is a
 // deliberately malformed one, to prove Cadence rejects it gracefully.
 //
-//   node test-harness.js [port] [host]      (default 8730 127.0.0.1)
+//   node test-harness.js [port] [host] [show|page]   (default 8730 127.0.0.1 show)
 const { makeFakeSelf } = require('./test/fake-self')
 const { setActions } = require('./actions')
 const { setFeedbacks } = require('./feedbacks')
 const { setPresets } = require('./presets')
 const { initVariables, updateVariables } = require('./variables')
-const { LIST_KEYS } = require('./helpers')
+const { LIST_KEYS, endpoints } = require('./helpers')
 
 const PORT = Number(process.argv[2] || 8730)
 const HOST = process.argv[3] || '127.0.0.1'
+const SCOPE = process.argv[4] === 'page' ? 'page' : 'show'
 const BASE = `http://${HOST}:${PORT}`
+const EP = endpoints({ scope: SCOPE })
 
 let failures = 0
 function assert(cond, msg) {
@@ -22,13 +24,17 @@ function assert(cond, msg) {
 }
 
 async function main() {
-	console.log(`Pulling snapshot from ${BASE}/api/state …`)
-	const snap = await (await fetch(`${BASE}/api/state`)).json()
+	console.log(`Pulling snapshot from ${BASE}${EP.state} (scope: ${SCOPE}) …`)
+	const res = await fetch(`${BASE}${EP.state}`)
+	if (!res.ok) throw new Error(`HTTP ${res.status} — ${SCOPE === 'show' ? 'no whole-show route here (old Cadence, or a Producer node port?)' : 'not a producer page'}`)
+	const snap = await res.json()
+	if (snap.ok === false) throw new Error(`Cadence refused: ${snap.error}`)
 	const counts = LIST_KEYS.map((k) => `${k}=${Array.isArray(snap[k]) ? snap[k].length : 'absent'}`).join(' ')
 	console.log(`  ${snap.page?.title || 'app-wide page'} — ${counts}`)
 
 	const self = makeFakeSelf(snap, { port: PORT })
 	self.config.host = HOST
+	self.config.scope = SCOPE
 
 	console.log('\nDefinitions built from the live snapshot:')
 	initVariables(self)
@@ -62,7 +68,7 @@ async function main() {
 
 	console.log('\nCommand path (harmless — malformed, must be rejected):')
 	const bad = await (
-		await fetch(`${BASE}/api/command`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'start' }) })
+		await fetch(`${BASE}${EP.command}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'start' }) })
 	).json()
 	assert(bad.ok === false, `malformed command rejected gracefully (error: "${bad.error ?? '—'}")`)
 

@@ -1,7 +1,7 @@
 const { InstanceBase, runEntrypoint } = require('@companion-module/base')
 const { UpgradeScripts } = require('./upgrades')
 const { GetConfigFields } = require('./config')
-const { EMPTY_STATE, normalizeSnapshot, methods } = require('./helpers')
+const { EMPTY_STATE, normalizeSnapshot, methods, endpoints, describeFailure } = require('./helpers')
 const { definitionMethods } = require('./definitions')
 
 class CadenceInstance extends InstanceBase {
@@ -61,18 +61,19 @@ class CadenceInstance extends InstanceBase {
 		}
 		this.polling = true
 		this.repoll = false
-		const target = this.baseURL()
+		const target = `${this.baseURL()}${endpoints(this.config).state}`
+		const current = () => target === `${this.baseURL()}${endpoints(this.config).state}`
 		try {
 			const ctrl = new AbortController()
 			const to = setTimeout(() => ctrl.abort(), 4000)
-			const res = await fetch(`${target}/api/state`, { signal: ctrl.signal })
+			const res = await fetch(target, { signal: ctrl.signal })
 			clearTimeout(to)
-			if (!res.ok) throw new Error(`HTTP ${res.status}`)
-			const snap = await res.json()
 			// Ignore a reply from a target the config has since moved away from.
-			if (target === this.baseURL()) this.pollSucceeded(snap)
+			if (!current()) return
+			if (!res.ok) return this.pollFailed(describeFailure(this.config, { httpStatus: res.status }))
+			this.handleStateReply(await res.json())
 		} catch (e) {
-			if (target === this.baseURL()) this.pollFailed(e.name === 'AbortError' ? 'timeout' : e.message)
+			if (current()) this.pollFailed(e.name === 'AbortError' ? 'timeout' : e.message)
 		} finally {
 			this.polling = false
 			if (this.repoll) this.poll()

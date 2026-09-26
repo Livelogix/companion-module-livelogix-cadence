@@ -14,6 +14,7 @@ const LIST_KEYS = [
 	'automations',
 	'cueStacks',
 	'polls',
+	'outputs', // whole-show scope only, read-only
 ]
 
 const EMPTY_STATE = Object.freeze({ clockStatus: '', now: 0 })
@@ -29,6 +30,7 @@ function normalizeSnapshot(snap) {
 	const state = {
 		clockStatus: snap.clockStatus || '',
 		now: snap.now || Date.now() / 1000,
+		scope: snap.scope === 'show' ? 'show' : 'page',
 		pageTitle: snap.page?.title || '',
 		undoScene: snap.undoScene || null,
 		undoRemaining: typeof snap.undoRemaining === 'number' ? snap.undoRemaining : null,
@@ -69,11 +71,76 @@ function parseTimeOfDay(input) {
 	return h * 3600 + min * 60 + sec
 }
 
+// Split a clock's DISPLAYED time into segments, so per-segment buttons always
+// match the screen exactly (Cadence's own rounding, overtime sign, formats):
+//   timers "05:00" / "01:02:03" / "−05:00" (overtime) · time of day "4:05 PM",
+//   "16:05:30" · timecode "01:02:03:04" · placeholders "--:--", "NO LTC".
+// Returns { hh, mm, ss, ff, sign, ampm } — missing segments are '' (and a
+// placeholder's digits are '--').
+function clockSegments(clock) {
+	const out = { hh: '', mm: '', ss: '', ff: '', sign: '', ampm: '' }
+	let t = String(clock?.primary ?? '').trim()
+	if (!t || !t.includes(':')) return out
+	// A sign only when a digit follows — "--:--" is a placeholder, not "-" + "-:--".
+	const signMatch = /^[−\-+](?=\s*\d)/.exec(t)
+	if (signMatch) {
+		out.sign = signMatch[0] === '+' ? '+' : '-'
+		t = t.slice(1).trim()
+	}
+	const ampm = /\s*([AaPp][Mm])$/.exec(t)
+	if (ampm) {
+		out.ampm = ampm[1].toUpperCase()
+		t = t.slice(0, ampm.index).trim()
+	}
+	const parts = t.split(':').map((p) => p.trim())
+	const pad = (p) => (/^\d+$/.test(p) ? p.padStart(2, '0') : p)
+	const tod = clock?.kind === 'timeOfDay'
+	if (tod) {
+		// Time of day: hours as shown ("4" in 12-hour, "16" in 24-hour).
+		out.hh = parts[0]
+		out.mm = pad(parts[1] ?? '')
+		out.ss = pad(parts[2] ?? '')
+	} else if (parts.length === 2) {
+		// Timers under an hour: MM:SS.
+		out.hh = '00'
+		out.mm = pad(parts[0])
+		out.ss = pad(parts[1])
+	} else if (parts.length >= 3) {
+		out.hh = pad(parts[0])
+		out.mm = pad(parts[1])
+		out.ss = pad(parts[2])
+		if (parts.length >= 4) out.ff = pad(parts[3]) // timecode frames
+	}
+	// A placeholder ("--:--") has no real hours either.
+	if (/^-+$/.test(out.mm) && out.hh === '00') out.hh = '--'
+	return out
+}
+
 const choice = (list, label) => list.map((x) => ({ id: x.id, label: label ? label(x) : x.name || x.id }))
 
 // Companion connection status values (mirrors @companion-module/base's
 // InstanceStatus, kept local so the offline tests don't need the IPC runtime).
-const Status = { Ok: 'ok', Connecting: 'connecting', ConnectionFailure: 'connection_failure' }
+const Status = { Ok: 'ok', Connecting: 'connecting', ConnectionFailure: 'connection_failure', BadConfig: 'bad_config' }
+
+// Whole show → Cadence's /api/show/* (every element); page → a Producer page's /api/*.
+function endpoints(config) {
+	return config?.scope === 'page'
+		? { state: '/api/state', command: '/api/command' }
+		: { state: '/api/show/state', command: '/api/show/command' }
+}
+
+// Turn a failed state pull into an operator-actionable message + status.
+function describeFailure(config, { httpStatus, error } = {}) {
+	if (httpStatus === 404 && config?.scope !== 'page') {
+		return {
+			status: Status.BadConfig,
+			message:
+				'This Cadence doesn’t offer whole-show control on this port — use the app port (8730) with an updated Cadence, or set Control scope to "One Producer page".',
+		}
+	}
+	if (error) return { status: Status.BadConfig, message: error } // Cadence refused (e.g. switched off)
+	return { status: Status.ConnectionFailure, message: httpStatus ? `HTTP ${httpStatus}` : 'no response' }
+}
 
 const methods = {
 	// Forget the previous target entirely — call whenever host/port change, so the
@@ -95,15 +162,25 @@ const methods = {
 		if (!wasConnected) this.updateStatus(Status.Ok)
 	},
 
-	// A poll failed: report once per outage, and blank live values so buttons
-	// don't show a frozen countdown.
-	pollFailed(message) {
-		if (this.connected || this.lastShapeSig !== 'DOWN') {
+	// A poll failed: report once per distinct problem, and blank live values so
+	// buttons don't show a frozen countdown. `failure` is a describeFailure()
+	// result or a bare message (connection failure).
+	pollFailed(failure) {
+		const f = typeof failure === 'object' && failure ? failure : { status: Status.ConnectionFailure, message: failure || 'no response' }
+		const key = `DOWN:${f.status}:${f.message}`
+		if (this.connected || this.lastShapeSig !== key) {
 			this.connected = false
-			this.lastShapeSig = 'DOWN'
-			this.updateStatus(Status.ConnectionFailure, message || 'no response')
+			this.lastShapeSig = key
+			this.updateStatus(f.status, f.message)
 			this.refreshValues()
 		}
+	},
+
+	// Handle a parsed /api/(show/)state reply: a refusal ({ok:false,error}) is a
+	// failure with Cadence's own explanation; anything else is a snapshot.
+	handleStateReply(snap) {
+		if (snap && snap.ok === false) return this.pollFailed(describeFailure(this.config, { error: snap.error }))
+		this.pollSucceeded(snap)
 	},
 
 	applySnapshot(snap) {
@@ -128,7 +205,7 @@ const methods = {
 	// Resolves to the ack ({ok, error}); never throws.
 	async sendCommand(body) {
 		try {
-			const res = await fetch(`${this.baseURL()}/api/command`, {
+			const res = await fetch(`${this.baseURL()}${endpoints(this.config).command}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(body),
@@ -152,13 +229,15 @@ const methods = {
 	// dropdowns and variable definitions are rebuilt only when the set changes,
 	// not on every poll (values change constantly; the option lists rarely do).
 	shapeSignature() {
+		// Names are part of the shape, so a rename in Cadence refreshes dropdown
+		// labels, variable descriptions and preset names (not just the values).
 		const s = this.state
-		const ids = (list, extra) => arr(list).map((x) => (extra ? extra(x) : x.id)).join(',')
+		const ids = (list, extra) => arr(list).map((x) => `${extra ? extra(x) : x.id}=${x.name ?? ''}`).join(',')
 		return [
 			ids(s.clocks, (c) => `${c.id}:${c.kind}:${c.ppControl ? 'pp' : ''}`),
 			ids(s.shifts),
 			ids(s.cueLights),
-			ids(s.presetBanks, (b) => `${b.id}:${arr(b.presets).map((p) => p.id).join('|')}`),
+			ids(s.presetBanks, (b) => `${b.id}:${arr(b.presets).map((p) => `${p.id}~${p.label}~${p.time}`).join('|')}`),
 			ids(s.schedules),
 			ids(s.schedulers),
 			ids(s.scenes),
@@ -166,6 +245,7 @@ const methods = {
 			ids(s.automations),
 			ids(s.cueStacks, (c) => c.clock),
 			ids(s.polls),
+			ids(s.outputs),
 		].join(';;')
 	},
 
@@ -225,6 +305,9 @@ const methods = {
 	pollChoices() {
 		return choice(this.state.polls)
 	},
+	outputChoices() {
+		return choice(this.state.outputs, (o) => `${o.name || o.id} (${o.kind})`)
+	},
 
 	findClock(id) {
 		return this.state.clocks.find((c) => c.id === id)
@@ -240,4 +323,4 @@ const methods = {
 	},
 }
 
-module.exports = { Status, EMPTY_STATE, LIST_KEYS, normalizeSnapshot, parseDuration, parseTimeOfDay, methods, arr }
+module.exports = { clockSegments, Status, endpoints, describeFailure, EMPTY_STATE, LIST_KEYS, normalizeSnapshot, parseDuration, parseTimeOfDay, methods, arr }

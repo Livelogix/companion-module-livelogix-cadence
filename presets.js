@@ -19,11 +19,16 @@ function setPresets(self) {
 		type: 'button',
 		category,
 		name,
-		style: { text, size: '14', color: WHITE, bgcolor: DARK, ...style },
+		// 'auto' suits multi-line labels; short labels pass a fixed size (see SIZE) —
+		// Companion's auto-size enlarges short text by splitting words ("PRE·V Q").
+		style: { text, size: 'auto', color: WHITE, bgcolor: DARK, ...style },
 		steps: [{ down, up: [] }],
 		feedbacks,
 	})
 	const act = (actionId, options) => ({ actionId, options })
+	// Fixed sizes measured on a 72 px key: 14 ≈ 5 capitals / 6 digits per line,
+	// 18 ≈ 4–5 characters.
+	const SIZE = { small: '14', medium: '18' }
 
 	// ---- Timers ------------------------------------------------------------------------
 	self.timers().forEach((c, i) => {
@@ -41,7 +46,6 @@ function setPresets(self) {
 				{ feedbackId: 'timer_mood', options: { clock: c.id, mood: 'danger' }, style: { bgcolor: RED, color: WHITE } },
 				{ feedbackId: 'timer_mood', options: { clock: c.id, mood: 'expired' }, style: { bgcolor: RED, color: WHITE } },
 			],
-			{ size: '18' },
 		)
 		presets[`timer_${n}_mirror`] = button(
 			cat,
@@ -49,17 +53,31 @@ function setPresets(self) {
 			`${v(`timer_${n}_time`)}`,
 			[act('timer_transport', { ...pick, action: 'toggle' })],
 			[{ feedbackId: 'clock_color', options: { clock: c.id, autoText: true } }],
-			{ size: '24' },
+			{ size: SIZE.small },
 		)
+		// Big digits: hours / minutes / seconds on three keys, in the on-screen colour.
+		for (const [seg, label, text] of [
+			['hh', 'hours (with − in overtime)', `${v(`timer_${n}_sign`)}${v(`timer_${n}_hh`)}`],
+			['mm', 'minutes', v(`timer_${n}_mm`)],
+			['ss', 'seconds', v(`timer_${n}_ss`)],
+		]) {
+			presets[`timer_${n}_big_${seg}`] = button(
+				cat,
+				`Big digits: ${label}`,
+				text,
+				[act('timer_transport', { ...pick, action: 'toggle' })],
+				[{ feedbackId: 'clock_color', options: { clock: c.id, autoText: true } }],
+			)
+		}
 		presets[`timer_${n}_reset`] = button(cat, 'Reset', `RESET\\n${v(`timer_${n}_name`)}`, [
 			act('timer_transport', { ...pick, action: 'reset' }),
 		])
 		presets[`timer_${n}_plus`] = button(cat, '+1:00', '+1:00', [act('timer_adjust', { ...pick, seconds: '60' })], [], {
-			size: '24',
+			size: SIZE.medium,
 			bgcolor: combineRgb(0, 70, 40),
 		})
 		presets[`timer_${n}_minus`] = button(cat, '−1:00', '−1:00', [act('timer_adjust', { ...pick, seconds: '-60' })], [], {
-			size: '24',
+			size: SIZE.medium,
 			bgcolor: combineRgb(70, 40, 0),
 		})
 		presets[`timer_${n}_undo`] = button(
@@ -85,10 +103,10 @@ function setPresets(self) {
 				{ feedbackId: 'schedule_on_deck_running', options: { schedule: s.id }, style: { bgcolor: AMBER, color: BLACK } },
 			],
 		)
-		presets[`sched_${k}_next`] = button(cat, 'Next cue', 'NEXT ▶', [act('schedule_control', { schedule: s.id, action: 'schedNext' })], [
+		presets[`sched_${k}_next`] = button(cat, 'Next cue', `NEXT ▶\\n${v(`schedule_${k}_position`)}`, [act('schedule_control', { schedule: s.id, action: 'schedNext' })], [
 			{ feedbackId: 'schedule_can', options: { schedule: s.id, what: 'canNext' }, style: { bgcolor: BLUE, color: WHITE } },
 		])
-		presets[`sched_${k}_prev`] = button(cat, 'Previous cue', '◀ PREV', [act('schedule_control', { schedule: s.id, action: 'schedPrev' })], [
+		presets[`sched_${k}_prev`] = button(cat, 'Previous cue', `◀ PREV\\n${v(`schedule_${k}_position`)}`, [act('schedule_control', { schedule: s.id, action: 'schedPrev' })], [
 			{ feedbackId: 'schedule_can', options: { schedule: s.id, what: 'canPrev' }, style: { bgcolor: BLUE, color: WHITE } },
 		])
 		presets[`sched_${k}_status`] = button(
@@ -139,33 +157,36 @@ function setPresets(self) {
 		presets[`poll_${k}_next`] = button(cat, 'Next question', `NEXT Q\\n${v(`poll_${k}_position`)}`, [
 			act('poll_control', { poll: p.id, action: 'pollNext' }),
 		])
-		presets[`poll_${k}_prev`] = button(cat, 'Previous question', 'PREV Q', [act('poll_control', { poll: p.id, action: 'pollPrev' })])
+		presets[`poll_${k}_prev`] = button(cat, 'Previous question', `PREV Q\\n${v(`poll_${k}_position`)}`, [act('poll_control', { poll: p.id, action: 'pollPrev' })])
 		presets[`poll_${k}_simulate`] = button(
 			cat,
 			'Simulate votes (start / stop)',
-			`SIMULATE\\n${v(`poll_${k}_sim_state`)}`,
+			`SIM\\n${v(`poll_${k}_sim_state`)}`,
 			[act('poll_simulate', { poll: p.id, action: 'toggle' })],
 			[
 				{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'simulating' }, style: { bgcolor: AMBER, color: BLACK } },
 				{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'streaming' }, style: { bgcolor: GREEN, color: WHITE } },
 			],
+			{ size: SIZE.small },
 		)
 		presets[`poll_${k}_sim_reveal`] = button(
 			cat,
 			'Simulated results: reveal / hide',
-			'SIM\\nREVEAL',
+			'SIM\\nReveal',
 			[act('poll_simulate', { poll: p.id, action: 'toggleReveal' })],
 			[{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'revealed' }, style: { bgcolor: BLUE, color: WHITE } }],
+			{ size: SIZE.small },
 		)
-		presets[`poll_${k}_leader`] =button(cat, 'Leading answer readout', `${v(`poll_${k}_leader`)}\\n${v(`poll_${k}_leader_percent`)}%`, [])
+		presets[`poll_${k}_leader`] = button(cat, 'Leading answer readout', `${v(`poll_${k}_leader`)}\\n${v(`poll_${k}_leader_percent`)}%`, [])
 	}
 
-	// ---- Messages -----------------------------------------------------------------------------
+	// ---- Messages (3 lines: auto-size then shrinks to keep the user's name whole
+	// instead of enlarging it and splitting a word) -----------------------------------------------------------------------------
 	for (const m of self.state.messages) {
 		presets[`msg_${key(m.id)}`] = button(
 			'Messages',
 			`${m.name || m.id}: Show / Hide`,
-			m.name || 'MSG',
+			`MSG\\n${m.name || 'Message'}\\n${v(`message_${key(m.id)}_vis`)}`,
 			[act('message_visibility', { message: m.id, vis: 'toggle' })],
 			[
 				{ feedbackId: 'message_vis', options: { message: m.id, vis: 'shown' }, style: { bgcolor: RED, color: WHITE } },
@@ -176,7 +197,7 @@ function setPresets(self) {
 
 	// ---- Scenes / automations / schedulers / presets / shifts / ProPresenter ---------
 	for (const s of self.state.scenes) {
-		presets[`scene_${key(s.id)}`] = button('Scenes', `Recall ${s.name || s.id}`, s.name || 'SCENE', [act('scene_recall', { scene: s.id })])
+		presets[`scene_${key(s.id)}`] = button('Scenes', `Recall ${s.name || s.id}`, `SCENE\\n${s.name || 'Scene'}\\nrecall`, [act('scene_recall', { scene: s.id })])
 	}
 	if (self.state.scenes.length) {
 		presets['scene_undo'] = button(
@@ -236,7 +257,7 @@ function setPresets(self) {
 				`${rate}×`,
 				[act('shift_rate', { shift: s.id, value: String(rate) })],
 				rate === 1 ? [] : [{ feedbackId: 'shift_active', options: { shift: s.id }, style: { bgcolor: AMBER, color: BLACK } }],
-				{ size: '24' },
+				{ size: SIZE.medium },
 			)
 		}
 	}
@@ -253,17 +274,30 @@ function setPresets(self) {
 		}
 	}
 
+	// ---- Outputs (status only) --------------------------------------------------------
+	for (const o of self.state.outputs) {
+		const k = key(o.id)
+		presets[`output_${k}`] = button(
+			'Outputs (status)',
+			`${o.name || o.id}: on/off + what it shows`,
+			`${o.name || 'OUT'}\\n${v(`output_${k}_source`)}`,
+			[],
+			[{ feedbackId: 'output_enabled', options: { output: o.id }, style: { bgcolor: GREEN, color: WHITE } }],
+		)
+	}
+
 	// ---- Cue light tally ------------------------------------------------------------------------
 	for (const c of self.state.cueLights) {
 		presets[`cuelight_${key(c.id)}`] = button('Cue Lights', `Cue light: ${c.name || c.id}`, c.name || 'CUE', [], [
 			{ feedbackId: 'cuelight_color', options: { cue: c.id } },
-		], { size: '18' })
+		])
 	}
 
 	// ---- Status ----------------------------------------------------------------------------------
-	presets['status'] = button('Status', 'Cadence connection + clock status', `Cadence\\n${v('clock_status')}`, [], [
+	presets['status'] = button('Status', 'Cadence connection + clock status', `${v('page_title')}\\n${v('connection_state')}`, [], [
 		{ feedbackId: 'offline', options: {}, style: { bgcolor: combineRgb(120, 0, 0), color: combineRgb(255, 180, 180) } },
 	])
+
 
 	self.setPresetDefinitions(presets)
 }

@@ -1,4 +1,31 @@
 const { combineRgb } = require('@companion-module/base')
+const { clockSegments } = require('./helpers')
+
+// Which part of a clock's displayed time the "Clock segment" feedback renders.
+const SEGMENTS = [
+	['hh', 'Hours'],
+	['mm', 'Minutes'],
+	['ss', 'Seconds'],
+	['ff', 'Frames (timecode)'],
+	['hhmm', 'Hours:Minutes'],
+	['mmss', 'Minutes:Seconds'],
+	['ampm', 'AM/PM (time of day)'],
+]
+
+// The text for one segment choice (optionally with the overtime "-" in front).
+function segmentText(clock, segment, withSign) {
+	const s = clockSegments(clock)
+	const text = {
+		hh: s.hh,
+		mm: s.mm,
+		ss: s.ss,
+		ff: s.ff,
+		hhmm: s.hh && s.mm ? `${s.hh}:${s.mm}` : '',
+		mmss: s.mm && s.ss ? `${s.mm}:${s.ss}` : '',
+		ampm: s.ampm,
+	}[segment]
+	return withSign && s.sign && segment !== 'ampm' ? `${s.sign}${text}` : text
+}
 
 const WHITE = combineRgb(255, 255, 255)
 const BLACK = combineRgb(0, 0, 0)
@@ -112,6 +139,27 @@ function setFeedbacks(self) {
 			const style = { bgcolor: bg }
 			if (fb.options.autoText) style.color = contrastText(c.colorHex)
 			return style
+		},
+	}
+
+	// Render ONE segment of a clock's time as the button text — hours on one key,
+	// minutes on the next, seconds on a third — always matching the screen.
+	f.clock_segment = {
+		type: 'advanced',
+		name: 'Clock segment (as button text)',
+		description:
+			'Shows just the hours, minutes or seconds (etc.) of a clock as the button’s text — put each on its own button for big, readable digits.',
+		options: [
+			picker('clock', 'Clock', self.clockChoices()),
+			select('segment', 'Segment', 'mm', SEGMENTS),
+			{ type: 'checkbox', id: 'withSign', label: 'Prefix "-" in overtime', default: false },
+			{ type: 'textinput', id: 'prefix', label: 'Text before (optional, e.g. "HRS\\n")', default: '' },
+		],
+		callback: (fb) => {
+			const c = self.findClock(fb.options.clock)
+			if (!c) return {}
+			const seg = self.connected ? segmentText(c, fb.options.segment, fb.options.withSign) : '--'
+			return { text: `${fb.options.prefix || ''}${seg}` }
 		},
 	}
 
@@ -330,6 +378,32 @@ function setFeedbacks(self) {
 		},
 	)
 
+	// ---- Outputs (read-only status; whole-show scope) ----------------------------
+	f.output_enabled = bool(
+		'Output is on',
+		'True while the output is enabled in Cadence (status only — Companion can’t switch outputs).',
+		GREEN,
+		WHITE,
+		[picker('output', 'Output', self.outputChoices())],
+		(fb) => !!self.findById('outputs', fb.options.output)?.enabled,
+	)
+
+	f.output_shows = bool(
+		'Output is showing…',
+		'True when the output is fed by the chosen design / page / clock / schedule (by name).',
+		BLUE,
+		WHITE,
+		[
+			picker('output', 'Output', self.outputChoices()),
+			{ type: 'textinput', id: 'source', label: 'Source name (exact, case-insensitive)', default: '' },
+		],
+		(fb) => {
+			const o = self.findById('outputs', fb.options.output)
+			const want = String(fb.options.source || '').trim().toLowerCase()
+			return !!o && !!want && String(o.sourceName || '').toLowerCase() === want
+		},
+	)
+
 	// ---- Connection -------------------------------------------------------------------
 	f.offline = bool(
 		'Cadence offline',
@@ -343,4 +417,4 @@ function setFeedbacks(self) {
 	self.setFeedbackDefinitions(f)
 }
 
-module.exports = { setFeedbacks, hexToRgbNumber, contrastText }
+module.exports = { setFeedbacks, hexToRgbNumber, contrastText, segmentText }

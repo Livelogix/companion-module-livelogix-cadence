@@ -3,7 +3,7 @@
 // reordering) and by a 1-based index (so a fixed button layout can show
 // "Timer 1" regardless of which timer that is). Every other entity is keyed by
 // its sanitised id.
-const { arr } = require('./helpers')
+const { arr, clockSegments } = require('./helpers')
 
 function sanitize(id) {
 	return String(id)
@@ -48,6 +48,13 @@ const ENTITY_VARS = [
 			['mood', 'state', (c) => c.mood || 'normal'],
 			['running', 'running (yes/no)', (c) => yesNo(c.running)],
 			['color', 'on-screen colour (hex)', (c) => c.colorHex || ''],
+			// Segments of the displayed time — one per button for big, readable digits.
+			['hh', 'hours segment', (c) => clockSegments(c).hh],
+			['mm', 'minutes segment', (c) => clockSegments(c).mm],
+			['ss', 'seconds segment', (c) => clockSegments(c).ss],
+			['ff', 'frames segment (timecode)', (c) => clockSegments(c).ff],
+			['sign', 'sign ("-" in overtime)', (c) => clockSegments(c).sign],
+			['ampm', 'AM/PM (time of day)', (c) => clockSegments(c).ampm],
 		],
 	],
 	[
@@ -160,6 +167,19 @@ const ENTITY_VARS = [
 			['sim_state', 'simulation (off / ready / open / closed)', (p) => (p.simulating ? p.simState || 'on' : 'off')],
 		],
 	],
+	[
+		// Whole-show scope only — READ-ONLY status (no output control by design).
+		'output',
+		'outputs',
+		(o) => o.id,
+		[
+			['name', 'name', (o) => o.name || o.id],
+			['enabled', 'on (yes/no)', (o) => yesNo(o.enabled)],
+			['kind', 'type (display/web/ndi/deckLink/cloud/timeMachines/vmix)', (o) => o.kind || ''],
+			['source', 'what it shows (design / page / clock / schedule name)', (o) => o.sourceName || ''],
+			['feeds', 'source type (design/producer/clock/schedule)', (o) => o.feeds || ''],
+		],
+	],
 ]
 
 function topCue(stack) {
@@ -196,6 +216,11 @@ const TIMER_VARS = [
 	['rate', 'time-shift rate (1 = normal)', (c) => (c.rate == null ? 1 : c.rate)],
 	['color', 'on-screen colour (hex)', (c) => c.colorHex || ''],
 	['undo', 'seconds left to undo last edit', (c) => (c.undo == null ? 0 : Math.ceil(c.undo))],
+	// Segments of the displayed time — hours / minutes / seconds on separate buttons.
+	['hh', 'hours segment', (c) => clockSegments(c).hh],
+	['mm', 'minutes segment', (c) => clockSegments(c).mm],
+	['ss', 'seconds segment', (c) => clockSegments(c).ss],
+	['sign', 'sign ("-" in overtime)', (c) => clockSegments(c).sign],
 ]
 
 function initVariables(self) {
@@ -251,6 +276,8 @@ function updateVariables(self) {
 	if (!self.connected) {
 		for (const id of Object.keys(values)) {
 			if (/_(time|remaining_hms)$/.test(id)) values[id] = '--:--'
+			else if (/^(timer|clock)_.*_(hh|mm|ss|ff)$/.test(id)) values[id] = '--'
+			else if (/^(timer|clock)_.*_(sign|ampm)$/.test(id)) values[id] = ''
 			else if (/_(remaining|countdown|progress)$/.test(id)) values[id] = ''
 			else if (/_running$/.test(id)) values[id] = 'no'
 		}

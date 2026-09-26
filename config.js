@@ -8,7 +8,7 @@ function GetConfigFields() {
 			width: 12,
 			label: 'About',
 			value:
-				'Connects to a Cadence Producer server over your LAN. Point this at the Mac running Cadence and the port of the Producer node you want to drive (or the app-wide producer page, default 8730). Actions control timers, presets, schedules and more; variables and feedbacks bring live time and status back into Companion.',
+				'Connects to Cadence over your LAN. "Whole show" controls every timer, message, scene, schedule, poll and more in the show (Cadence’s app port, default 8730). "One Producer page" limits Companion to what’s wired onto that Producer node — use its port.',
 		},
 		{
 			type: 'textinput',
@@ -21,11 +21,22 @@ function GetConfigFields() {
 		{
 			type: 'number',
 			id: 'port',
-			label: 'Producer Port',
+			label: 'Port',
 			width: 4,
 			default: 8730,
 			min: 1,
 			max: 65535,
+		},
+		{
+			type: 'dropdown',
+			id: 'scope',
+			label: 'Control scope',
+			width: 12,
+			default: 'show',
+			choices: [
+				{ id: 'show', label: 'Whole show — everything in Cadence’s editor (app port, 8730)' },
+				{ id: 'page', label: 'One Producer page — only what’s wired onto it (that node’s port)' },
+			],
 		},
 		{
 			type: 'number',

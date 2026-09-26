@@ -3,7 +3,7 @@
 	"name": "livelogix-cadence",
 	"shortname": "Cadence",
 	"description": "Control LiveLogix Cadence timers, presets, schedules, cue stacks, polls and cue lights — with live time, status and tally feedback.",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"license": "MIT",
 	"repository": "https://github.com/livelogix/companion-module-livelogix-cadence",
 	"bugs": "https://github.com/livelogix/companion-module-livelogix-cadence/issues",
