@@ -11,7 +11,8 @@ http
 			res.writeHead(200, { 'Content-Type': 'application/json', Connection: 'close' })
 			res.end(JSON.stringify(obj))
 		}
-		if (req.method === 'GET' && req.url.startsWith('/api/state')) return send(FIXTURE)
+		if (req.method === 'GET' && (req.url.startsWith('/api/state') || req.url.startsWith('/api/show/state')))
+			return send(FIXTURE)
 		let body = ''
 		req.on('data', (c) => (body += c))
 		req.on('end', () => {

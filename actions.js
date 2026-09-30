@@ -356,7 +356,8 @@ function setActions(self) {
 			const message = event.options.message
 			if (!message) return
 			let vis = event.options.vis
-			if (vis === 'toggle') vis = (self.findById('messages', message)?.vis || 'hidden') === 'hidden' ? 'shown' : 'hidden'
+			if (vis === 'toggle')
+				vis = (self.findById('messages', message)?.vis || 'hidden') === 'hidden' ? 'shown' : 'hidden'
 			await self.sendCommand({ action: 'msgVis', message, vis })
 		},
 	}
@@ -448,7 +449,13 @@ function setActions(self) {
 		name: 'Cue Stack: Add a time',
 		options: [
 			picker('clock', 'Cue Stack (timer)', self.cueStackChoices()),
-			{ type: 'textinput', id: 'value', label: 'Time — "5:00", "90", or a variable', default: '5:00', useVariables: true },
+			{
+				type: 'textinput',
+				id: 'value',
+				label: 'Time — "5:00", "90", or a variable',
+				default: '5:00',
+				useVariables: true,
+			},
 			{ type: 'textinput', id: 'label', label: 'Label (optional)', default: '', useVariables: true },
 		],
 		callback: async (event) => {

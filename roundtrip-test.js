@@ -11,7 +11,13 @@ async function state() {
 	return d.clocks.find((c) => c.id === CLOCK)
 }
 async function cmd(body) {
-	const r = await (await fetch(`${BASE}/api/command`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json()
+	const r = await (
+		await fetch(`${BASE}/api/command`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(body),
+		})
+	).json()
 	return r
 }
 
@@ -89,4 +95,7 @@ async function main() {
 	console.log(`\n${fails === 0 ? 'ALL PASS' : fails + ' FAILURE(S)'}`)
 	process.exit(fails === 0 ? 0 : 1)
 }
-main().catch((e) => { console.error('error:', e); process.exit(2) })
+main().catch((e) => {
+	console.error('error:', e)
+	process.exit(2)
+})

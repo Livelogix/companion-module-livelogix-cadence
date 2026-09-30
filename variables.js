@@ -236,7 +236,8 @@ function initVariables(self) {
 
 	self.timers().forEach((_, i) => {
 		const n = i + 1
-		for (const [suffix, name] of TIMER_VARS) defs.push({ variableId: `timer_${n}_${suffix}`, name: `Timer ${n}: ${name}` })
+		for (const [suffix, name] of TIMER_VARS)
+			defs.push({ variableId: `timer_${n}_${suffix}`, name: `Timer ${n}: ${name}` })
 	})
 
 	for (const [prefix, key, keyOf, vars] of ENTITY_VARS) {

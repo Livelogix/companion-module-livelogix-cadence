@@ -68,7 +68,10 @@ test('outputs: read-only variables, feedbacks, status presets — and no output 
 	assert.equal(runFeedback(self, 'output_enabled', { output: 'out-2' }), false)
 	assert.equal(runFeedback(self, 'output_shows', { output: 'out-1', source: 'keynote look' }), true)
 	assert.ok('output_out_1' in self._presets)
-	assert.deepEqual(Object.keys(self._actions).filter((a) => a.startsWith('output')), [])
+	assert.deepEqual(
+		Object.keys(self._actions).filter((a) => a.startsWith('output')),
+		[],
+	)
 })
 
 test('renaming an element in Cadence refreshes dropdown labels', () => {

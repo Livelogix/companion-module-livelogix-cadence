@@ -10,7 +10,13 @@ const FIXTURE = require('./fixture-snapshot.json')
 // The fixture poll with a simulation in progress (fake votes streaming, not yet revealed).
 const SIMULATING = {
 	...FIXTURE,
-	polls: FIXTURE.polls.map((p) => ({ ...p, simulating: true, simStreaming: true, simRevealed: false, simState: 'open' })),
+	polls: FIXTURE.polls.map((p) => ({
+		...p,
+		simulating: true,
+		simStreaming: true,
+		simRevealed: false,
+		simState: 'open',
+	})),
 }
 
 let mock, self

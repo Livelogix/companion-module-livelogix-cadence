@@ -399,7 +399,9 @@ function setFeedbacks(self) {
 		],
 		(fb) => {
 			const o = self.findById('outputs', fb.options.output)
-			const want = String(fb.options.source || '').trim().toLowerCase()
+			const want = String(fb.options.source || '')
+				.trim()
+				.toLowerCase()
 			return !!o && !!want && String(o.sourceName || '').toLowerCase() === want
 		},
 	)

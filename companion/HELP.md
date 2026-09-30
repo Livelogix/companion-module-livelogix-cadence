@@ -28,6 +28,7 @@ With Whole show, each output's on/off state and what it's showing come through a
 ## Actions
 
 **Timers**
+
 - Start / Pause / Toggle / Reset
 - Adjust ± seconds
 - Set duration (`5:00`, `1:30:00` or seconds — optionally start)
@@ -39,6 +40,7 @@ With Whole show, each output's on/off state and what it's showing come through a
 Every timer action has an **override ID** field that accepts variables.
 
 **Show control**
+
 - **Preset:** load a bank preset into its wired timers — Set, Set & Start, or Arm only.
 - **Schedule:** Set / Set & Start / Set, Start & advance / Add to Cue Stack / Next / Previous / Correct to sheet start or end / Refresh from Google Sheet; **Jump to cue** by sheet cue # or row.
 - **Scheduler:** Arm / Disarm / Toggle / Fire next row.

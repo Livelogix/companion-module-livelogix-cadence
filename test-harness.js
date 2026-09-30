@@ -26,7 +26,10 @@ function assert(cond, msg) {
 async function main() {
 	console.log(`Pulling snapshot from ${BASE}${EP.state} (scope: ${SCOPE}) …`)
 	const res = await fetch(`${BASE}${EP.state}`)
-	if (!res.ok) throw new Error(`HTTP ${res.status} — ${SCOPE === 'show' ? 'no whole-show route here (old Cadence, or a Producer node port?)' : 'not a producer page'}`)
+	if (!res.ok)
+		throw new Error(
+			`HTTP ${res.status} — ${SCOPE === 'show' ? 'no whole-show route here (old Cadence, or a Producer node port?)' : 'not a producer page'}`,
+		)
 	const snap = await res.json()
 	if (snap.ok === false) throw new Error(`Cadence refused: ${snap.error}`)
 	const counts = LIST_KEYS.map((k) => `${k}=${Array.isArray(snap[k]) ? snap[k].length : 'absent'}`).join(' ')
@@ -47,7 +50,10 @@ async function main() {
 	assert(self._varDefs.length >= 7, `${self._varDefs.length} variables`)
 	console.log(`  • ${Object.keys(self._presets).length} presets`)
 	const unvalued = self._varDefs.filter((d) => !(d.variableId in self._varValues))
-	assert(unvalued.length === 0, `every variable has a value${unvalued.length ? ` (missing: ${unvalued.map((d) => d.variableId).join(', ')})` : ''}`)
+	assert(
+		unvalued.length === 0,
+		`every variable has a value${unvalued.length ? ` (missing: ${unvalued.map((d) => d.variableId).join(', ')})` : ''}`,
+	)
 
 	console.log('\nFeedbacks evaluate against live state without throwing:')
 	let evaluated = 0
@@ -63,12 +69,18 @@ async function main() {
 	}
 	assert(evaluated === Object.keys(self._feedbacks).length, `${evaluated} feedbacks evaluated`)
 
-	for (const t of self.timers().slice(0, 3)) console.log(`  timer "${t.name}": ${t.primary} (${t.mood}${t.running ? ', running' : ''})`)
-	for (const p of self.state.polls) console.log(`  poll "${p.name}": ${p.state}, ${p.total} votes, Q${p.index}/${p.count}`)
+	for (const t of self.timers().slice(0, 3))
+		console.log(`  timer "${t.name}": ${t.primary} (${t.mood}${t.running ? ', running' : ''})`)
+	for (const p of self.state.polls)
+		console.log(`  poll "${p.name}": ${p.state}, ${p.total} votes, Q${p.index}/${p.count}`)
 
 	console.log('\nCommand path (harmless — malformed, must be rejected):')
 	const bad = await (
-		await fetch(`${BASE}${EP.command}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'start' }) })
+		await fetch(`${BASE}${EP.command}`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ action: 'start' }),
+		})
 	).json()
 	assert(bad.ok === false, `malformed command rejected gracefully (error: "${bad.error ?? '—'}")`)
 

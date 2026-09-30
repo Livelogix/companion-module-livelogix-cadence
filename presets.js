@@ -12,7 +12,10 @@ function setPresets(self) {
 	const presets = {}
 	// Reference this connection's own variables by its current label.
 	const v = (name) => `$(${self.label}:${name})`
-	const key = (id) => String(id).toLowerCase().replace(/[^a-z0-9_]/g, '_')
+	const key = (id) =>
+		String(id)
+			.toLowerCase()
+			.replace(/[^a-z0-9_]/g, '_')
 
 	// A button: text/style, one press sequence, and feedbacks.
 	const button = (category, name, text, down, feedbacks = [], style = {}) => ({
@@ -42,7 +45,11 @@ function setPresets(self) {
 			[act('timer_transport', { ...pick, action: 'toggle' })],
 			[
 				{ feedbackId: 'timer_running', options: { clock: c.id }, style: { bgcolor: GREEN, color: WHITE } },
-				{ feedbackId: 'timer_mood', options: { clock: c.id, mood: 'warning' }, style: { bgcolor: AMBER, color: BLACK } },
+				{
+					feedbackId: 'timer_mood',
+					options: { clock: c.id, mood: 'warning' },
+					style: { bgcolor: AMBER, color: BLACK },
+				},
 				{ feedbackId: 'timer_mood', options: { clock: c.id, mood: 'danger' }, style: { bgcolor: RED, color: WHITE } },
 				{ feedbackId: 'timer_mood', options: { clock: c.id, mood: 'expired' }, style: { bgcolor: RED, color: WHITE } },
 			],
@@ -76,10 +83,17 @@ function setPresets(self) {
 			size: SIZE.medium,
 			bgcolor: combineRgb(0, 70, 40),
 		})
-		presets[`timer_${n}_minus`] = button(cat, '−1:00', '−1:00', [act('timer_adjust', { ...pick, seconds: '-60' })], [], {
-			size: SIZE.medium,
-			bgcolor: combineRgb(70, 40, 0),
-		})
+		presets[`timer_${n}_minus`] = button(
+			cat,
+			'−1:00',
+			'−1:00',
+			[act('timer_adjust', { ...pick, seconds: '-60' })],
+			[],
+			{
+				size: SIZE.medium,
+				bgcolor: combineRgb(70, 40, 0),
+			},
+		)
 		presets[`timer_${n}_undo`] = button(
 			cat,
 			'Undo last edit',
@@ -99,24 +113,60 @@ function setPresets(self) {
 			`GO\\n${v(`schedule_${k}_ondeck`)}`,
 			[act('schedule_control', { schedule: s.id, action: 'schedSetStart' })],
 			[
-				{ feedbackId: 'schedule_can', options: { schedule: s.id, what: 'canSet' }, style: { bgcolor: GREEN, color: WHITE } },
-				{ feedbackId: 'schedule_on_deck_running', options: { schedule: s.id }, style: { bgcolor: AMBER, color: BLACK } },
+				{
+					feedbackId: 'schedule_can',
+					options: { schedule: s.id, what: 'canSet' },
+					style: { bgcolor: GREEN, color: WHITE },
+				},
+				{
+					feedbackId: 'schedule_on_deck_running',
+					options: { schedule: s.id },
+					style: { bgcolor: AMBER, color: BLACK },
+				},
 			],
 		)
-		presets[`sched_${k}_next`] = button(cat, 'Next cue', `NEXT ▶\\n${v(`schedule_${k}_position`)}`, [act('schedule_control', { schedule: s.id, action: 'schedNext' })], [
-			{ feedbackId: 'schedule_can', options: { schedule: s.id, what: 'canNext' }, style: { bgcolor: BLUE, color: WHITE } },
-		])
-		presets[`sched_${k}_prev`] = button(cat, 'Previous cue', `◀ PREV\\n${v(`schedule_${k}_position`)}`, [act('schedule_control', { schedule: s.id, action: 'schedPrev' })], [
-			{ feedbackId: 'schedule_can', options: { schedule: s.id, what: 'canPrev' }, style: { bgcolor: BLUE, color: WHITE } },
-		])
+		presets[`sched_${k}_next`] = button(
+			cat,
+			'Next cue',
+			`NEXT ▶\\n${v(`schedule_${k}_position`)}`,
+			[act('schedule_control', { schedule: s.id, action: 'schedNext' })],
+			[
+				{
+					feedbackId: 'schedule_can',
+					options: { schedule: s.id, what: 'canNext' },
+					style: { bgcolor: BLUE, color: WHITE },
+				},
+			],
+		)
+		presets[`sched_${k}_prev`] = button(
+			cat,
+			'Previous cue',
+			`◀ PREV\\n${v(`schedule_${k}_position`)}`,
+			[act('schedule_control', { schedule: s.id, action: 'schedPrev' })],
+			[
+				{
+					feedbackId: 'schedule_can',
+					options: { schedule: s.id, what: 'canPrev' },
+					style: { bgcolor: BLUE, color: WHITE },
+				},
+			],
+		)
 		presets[`sched_${k}_status`] = button(
 			cat,
 			'Ahead/behind readout (red when 1+ min behind)',
 			`${v(`schedule_${k}_position`)}\\n${v(`schedule_${k}_drift`)}`,
 			[],
 			[
-				{ feedbackId: 'schedule_drift', options: { schedule: s.id, dir: 'behind', seconds: 60 }, style: { bgcolor: RED, color: WHITE } },
-				{ feedbackId: 'schedule_drift', options: { schedule: s.id, dir: 'ahead', seconds: 60 }, style: { bgcolor: GREEN, color: WHITE } },
+				{
+					feedbackId: 'schedule_drift',
+					options: { schedule: s.id, dir: 'behind', seconds: 60 },
+					style: { bgcolor: RED, color: WHITE },
+				},
+				{
+					feedbackId: 'schedule_drift',
+					options: { schedule: s.id, dir: 'ahead', seconds: 60 },
+					style: { bgcolor: GREEN, color: WHITE },
+				},
 			],
 		)
 	}
@@ -157,15 +207,25 @@ function setPresets(self) {
 		presets[`poll_${k}_next`] = button(cat, 'Next question', `NEXT Q\\n${v(`poll_${k}_position`)}`, [
 			act('poll_control', { poll: p.id, action: 'pollNext' }),
 		])
-		presets[`poll_${k}_prev`] = button(cat, 'Previous question', `PREV Q\\n${v(`poll_${k}_position`)}`, [act('poll_control', { poll: p.id, action: 'pollPrev' })])
+		presets[`poll_${k}_prev`] = button(cat, 'Previous question', `PREV Q\\n${v(`poll_${k}_position`)}`, [
+			act('poll_control', { poll: p.id, action: 'pollPrev' }),
+		])
 		presets[`poll_${k}_simulate`] = button(
 			cat,
 			'Simulate votes (start / stop)',
 			`SIM\\n${v(`poll_${k}_sim_state`)}`,
 			[act('poll_simulate', { poll: p.id, action: 'toggle' })],
 			[
-				{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'simulating' }, style: { bgcolor: AMBER, color: BLACK } },
-				{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'streaming' }, style: { bgcolor: GREEN, color: WHITE } },
+				{
+					feedbackId: 'poll_simulating',
+					options: { poll: p.id, when: 'simulating' },
+					style: { bgcolor: AMBER, color: BLACK },
+				},
+				{
+					feedbackId: 'poll_simulating',
+					options: { poll: p.id, when: 'streaming' },
+					style: { bgcolor: GREEN, color: WHITE },
+				},
 			],
 			{ size: SIZE.small },
 		)
@@ -174,10 +234,21 @@ function setPresets(self) {
 			'Simulated results: reveal / hide',
 			'SIM\\nReveal',
 			[act('poll_simulate', { poll: p.id, action: 'toggleReveal' })],
-			[{ feedbackId: 'poll_simulating', options: { poll: p.id, when: 'revealed' }, style: { bgcolor: BLUE, color: WHITE } }],
+			[
+				{
+					feedbackId: 'poll_simulating',
+					options: { poll: p.id, when: 'revealed' },
+					style: { bgcolor: BLUE, color: WHITE },
+				},
+			],
 			{ size: SIZE.small },
 		)
-		presets[`poll_${k}_leader`] = button(cat, 'Leading answer readout', `${v(`poll_${k}_leader`)}\\n${v(`poll_${k}_leader_percent`)}%`, [])
+		presets[`poll_${k}_leader`] = button(
+			cat,
+			'Leading answer readout',
+			`${v(`poll_${k}_leader`)}\\n${v(`poll_${k}_leader_percent`)}%`,
+			[],
+		)
 	}
 
 	// ---- Messages (3 lines: auto-size then shrinks to keep the user's name whole
@@ -190,14 +261,23 @@ function setPresets(self) {
 			[act('message_visibility', { message: m.id, vis: 'toggle' })],
 			[
 				{ feedbackId: 'message_vis', options: { message: m.id, vis: 'shown' }, style: { bgcolor: RED, color: WHITE } },
-				{ feedbackId: 'message_vis', options: { message: m.id, vis: 'flashing' }, style: { bgcolor: AMBER, color: BLACK } },
+				{
+					feedbackId: 'message_vis',
+					options: { message: m.id, vis: 'flashing' },
+					style: { bgcolor: AMBER, color: BLACK },
+				},
 			],
 		)
 	}
 
 	// ---- Scenes / automations / schedulers / presets / shifts / ProPresenter ---------
 	for (const s of self.state.scenes) {
-		presets[`scene_${key(s.id)}`] = button('Scenes', `Recall ${s.name || s.id}`, `SCENE\\n${s.name || 'Scene'}\\nrecall`, [act('scene_recall', { scene: s.id })])
+		presets[`scene_${key(s.id)}`] = button(
+			'Scenes',
+			`Recall ${s.name || s.id}`,
+			`SCENE\\n${s.name || 'Scene'}\\nrecall`,
+			[act('scene_recall', { scene: s.id })],
+		)
 	}
 	if (self.state.scenes.length) {
 		presets['scene_undo'] = button(
@@ -231,9 +311,12 @@ function setPresets(self) {
 			[act('scheduler_control', { scheduler: s.id, action: 'toggle' })],
 			[{ feedbackId: 'scheduler_armed', options: { scheduler: s.id }, style: { bgcolor: GREEN, color: WHITE } }],
 		)
-		presets[`schr_${k}_fire`] = button('Schedulers', `${s.name || s.id}: Fire next row`, `FIRE\\n${v(`scheduler_${k}_next_title`)}`, [
-			act('scheduler_control', { scheduler: s.id, action: 'schFireNext' }),
-		])
+		presets[`schr_${k}_fire`] = button(
+			'Schedulers',
+			`${s.name || s.id}: Fire next row`,
+			`FIRE\\n${v(`scheduler_${k}_next_title`)}`,
+			[act('scheduler_control', { scheduler: s.id, action: 'schFireNext' })],
+		)
 	}
 
 	for (const b of self.state.presetBanks) {
@@ -256,7 +339,9 @@ function setPresets(self) {
 				`Rate ${rate}×`,
 				`${rate}×`,
 				[act('shift_rate', { shift: s.id, value: String(rate) })],
-				rate === 1 ? [] : [{ feedbackId: 'shift_active', options: { shift: s.id }, style: { bgcolor: AMBER, color: BLACK } }],
+				rate === 1
+					? []
+					: [{ feedbackId: 'shift_active', options: { shift: s.id }, style: { bgcolor: AMBER, color: BLACK } }],
 				{ size: SIZE.medium },
 			)
 		}
@@ -268,9 +353,12 @@ function setPresets(self) {
 			['ppStop', 'STOP'],
 			['ppReset', 'RESET'],
 		]) {
-			presets[`pp_${key(c.id)}_${action}`] = button(`ProPresenter: ${c.name || c.id}`, label, `PP ${label}\\n${v(`clock_${key(c.id)}_time`)}`, [
-				act('propresenter_timer', { clock: c.id, action }),
-			])
+			presets[`pp_${key(c.id)}_${action}`] = button(
+				`ProPresenter: ${c.name || c.id}`,
+				label,
+				`PP ${label}\\n${v(`clock_${key(c.id)}_time`)}`,
+				[act('propresenter_timer', { clock: c.id, action })],
+			)
 		}
 	}
 
@@ -288,16 +376,29 @@ function setPresets(self) {
 
 	// ---- Cue light tally ------------------------------------------------------------------------
 	for (const c of self.state.cueLights) {
-		presets[`cuelight_${key(c.id)}`] = button('Cue Lights', `Cue light: ${c.name || c.id}`, c.name || 'CUE', [], [
-			{ feedbackId: 'cuelight_color', options: { cue: c.id } },
-		])
+		presets[`cuelight_${key(c.id)}`] = button(
+			'Cue Lights',
+			`Cue light: ${c.name || c.id}`,
+			c.name || 'CUE',
+			[],
+			[{ feedbackId: 'cuelight_color', options: { cue: c.id } }],
+		)
 	}
 
 	// ---- Status ----------------------------------------------------------------------------------
-	presets['status'] = button('Status', 'Cadence connection + clock status', `${v('page_title')}\\n${v('connection_state')}`, [], [
-		{ feedbackId: 'offline', options: {}, style: { bgcolor: combineRgb(120, 0, 0), color: combineRgb(255, 180, 180) } },
-	])
-
+	presets['status'] = button(
+		'Status',
+		'Cadence connection + clock status',
+		`${v('page_title')}\\n${v('connection_state')}`,
+		[],
+		[
+			{
+				feedbackId: 'offline',
+				options: {},
+				style: { bgcolor: combineRgb(120, 0, 0), color: combineRgb(255, 180, 180) },
+			},
+		],
+	)
 
 	self.setPresetDefinitions(presets)
 }

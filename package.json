@@ -3,14 +3,28 @@
 	"version": "1.2.0",
 	"main": "main.js",
 	"type": "commonjs",
-	"license": "MIT",
-	"private": true,
 	"scripts": {
 		"test": "node --test \"test/*.test.js\"",
 		"smoke": "node test-harness.js",
-		"format": "prettier -w ."
+		"format": "prettier -w .",
+		"package": "companion-module-build"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-livelogix-cadence.git"
+	},
+	"engines": {
+		"node": "^22.18",
+		"yarn": "^4"
 	},
 	"dependencies": {
-		"@companion-module/base": "^1.11.0"
-	}
+		"@companion-module/base": "~1.14.1"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^2.8.0",
+		"prettier": "^3.6.2"
+	},
+	"prettier": "@companion-module/tools/.prettierrc.json",
+	"packageManager": "yarn@4.17.0"
 }

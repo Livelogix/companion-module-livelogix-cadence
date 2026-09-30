@@ -166,7 +166,10 @@ const methods = {
 	// buttons don't show a frozen countdown. `failure` is a describeFailure()
 	// result or a bare message (connection failure).
 	pollFailed(failure) {
-		const f = typeof failure === 'object' && failure ? failure : { status: Status.ConnectionFailure, message: failure || 'no response' }
+		const f =
+			typeof failure === 'object' && failure
+				? failure
+				: { status: Status.ConnectionFailure, message: failure || 'no response' }
 		const key = `DOWN:${f.status}:${f.message}`
 		if (this.connected || this.lastShapeSig !== key) {
 			this.connected = false
@@ -232,12 +235,21 @@ const methods = {
 		// Names are part of the shape, so a rename in Cadence refreshes dropdown
 		// labels, variable descriptions and preset names (not just the values).
 		const s = this.state
-		const ids = (list, extra) => arr(list).map((x) => `${extra ? extra(x) : x.id}=${x.name ?? ''}`).join(',')
+		const ids = (list, extra) =>
+			arr(list)
+				.map((x) => `${extra ? extra(x) : x.id}=${x.name ?? ''}`)
+				.join(',')
 		return [
 			ids(s.clocks, (c) => `${c.id}:${c.kind}:${c.ppControl ? 'pp' : ''}`),
 			ids(s.shifts),
 			ids(s.cueLights),
-			ids(s.presetBanks, (b) => `${b.id}:${arr(b.presets).map((p) => `${p.id}~${p.label}~${p.time}`).join('|')}`),
+			ids(
+				s.presetBanks,
+				(b) =>
+					`${b.id}:${arr(b.presets)
+						.map((p) => `${p.id}~${p.label}~${p.time}`)
+						.join('|')}`,
+			),
 			ids(s.schedules),
 			ids(s.schedulers),
 			ids(s.scenes),
@@ -280,7 +292,8 @@ const methods = {
 	allPresetChoices() {
 		const out = []
 		for (const b of this.state.presetBanks)
-			for (const p of arr(b.presets)) out.push({ id: `${b.id}::${p.id}`, label: `${b.name || b.id} › ${p.label} (${p.time})` })
+			for (const p of arr(b.presets))
+				out.push({ id: `${b.id}::${p.id}`, label: `${b.name || b.id} › ${p.label} (${p.time})` })
 		return out
 	},
 	scheduleChoices() {
@@ -323,4 +336,16 @@ const methods = {
 	},
 }
 
-module.exports = { clockSegments, Status, endpoints, describeFailure, EMPTY_STATE, LIST_KEYS, normalizeSnapshot, parseDuration, parseTimeOfDay, methods, arr }
+module.exports = {
+	clockSegments,
+	Status,
+	endpoints,
+	describeFailure,
+	EMPTY_STATE,
+	LIST_KEYS,
+	normalizeSnapshot,
+	parseDuration,
+	parseTimeOfDay,
+	methods,
+	arr,
+}

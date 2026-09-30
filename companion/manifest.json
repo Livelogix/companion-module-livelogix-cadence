@@ -1,12 +1,13 @@
 {
+	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
 	"id": "livelogix-cadence",
 	"name": "livelogix-cadence",
 	"shortname": "Cadence",
-	"description": "Control LiveLogix Cadence timers, presets, schedules, cue stacks, polls and cue lights — with live time, status and tally feedback.",
+	"description": "Control LiveLogix Cadence timers, presets, schedules, cue stacks, polls and cue lights \u2014 with live time, status and tally feedback.",
 	"version": "1.2.0",
 	"license": "MIT",
-	"repository": "https://github.com/livelogix/companion-module-livelogix-cadence",
-	"bugs": "https://github.com/livelogix/companion-module-livelogix-cadence/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-livelogix-cadence.git",
+	"bugs": "https://github.com/bitfocus/companion-module-livelogix-cadence/issues",
 	"maintainers": [
 		{
 			"name": "LiveLogix",

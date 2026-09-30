@@ -10,30 +10,35 @@ See [companion/HELP.md](companion/HELP.md) for actions, feedbacks, variables and
 
 Companion loads external modules from a developer folder:
 
-1. Companion → **Settings → Developer modules path** → point it at a folder that **contains** this module directory (on Jason's Mac, `~/Documents/companion-dev-modules/livelogix-cadence` is a symlink to it).
+1. Companion → **Settings → Developer modules path** → point it at a folder that **contains** this module directory.
 2. Add a connection and search for **Cadence**.
 
 ```sh
-npm install           # @companion-module/base
-npm test              # offline suite — real action code against a mock Cadence
-npm run smoke -- 8741 # read-only smoke test against a RUNNING Cadence producer port
+yarn install          # Yarn 4 (via corepack)
+yarn test             # offline suite — real action code against a mock Cadence
+yarn smoke 8730       # read-only smoke test against a RUNNING Cadence (app or Producer port)
 node test/serve-mock.js 18730   # standalone mock Cadence for pointing a real Companion at
+yarn package          # build the installable .tgz (companion-module-build)
 ```
+
+## Releasing
+
+Bump `version` in `package.json`, commit, tag `vX.Y.Z`, push, then submit the tag in the [Bitfocus Developer Portal](https://developer.bitfocus.io/) (My Connections → livelogix-cadence → Submit Version).
 
 ## Layout
 
-| File | Role |
-| --- | --- |
-| `main.js` | Companion lifecycle + polling (thin) |
-| `helpers.js` | state normalisation, parsers, connection-status transitions, `sendCommand`, choice/find helpers — mixed onto the instance |
-| `definitions.js` | rebuild definitions / push values — mixed onto the instance |
-| `config.js` | connection settings (host / port / poll interval) |
-| `actions.js` | control commands |
-| `feedbacks.js` | button styling from live state |
-| `variables.js` | live readouts (table-driven per entity) |
-| `presets.js` | ready-made buttons |
-| `test/` | mock Cadence, fake instance, fixture snapshot, node:test suites |
-| `companion/manifest.json` | Companion module manifest |
-| `companion/HELP.md` | in-app help |
+| File                      | Role                                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `main.js`                 | Companion lifecycle + polling (thin)                                                                                      |
+| `helpers.js`              | state normalisation, parsers, connection-status transitions, `sendCommand`, choice/find helpers — mixed onto the instance |
+| `definitions.js`          | rebuild definitions / push values — mixed onto the instance                                                               |
+| `config.js`               | connection settings (host / port / poll interval)                                                                         |
+| `actions.js`              | control commands                                                                                                          |
+| `feedbacks.js`            | button styling from live state                                                                                            |
+| `variables.js`            | live readouts (table-driven per entity)                                                                                   |
+| `presets.js`              | ready-made buttons                                                                                                        |
+| `test/`                   | mock Cadence, fake instance, fixture snapshot, node:test suites                                                           |
+| `companion/manifest.json` | Companion module manifest                                                                                                 |
+| `companion/HELP.md`       | in-app help                                                                                                               |
 
 The tests run the module's real `helpers`/`definitions` mixins on a fake instance, so what's tested is what Companion runs.

@@ -60,7 +60,10 @@ test('bad input sends nothing', async () => {
 test('schedule action defaults to a valid wire action', async () => {
 	const def = self._actions.schedule_control
 	const action = def.options.find((o) => o.id === 'action')
-	assert.ok(action.choices.some((c) => c.id === action.default), `default "${action.default}" is one of the choices`)
+	assert.ok(
+		action.choices.some((c) => c.id === action.default),
+		`default "${action.default}" is one of the choices`,
+	)
 })
 
 test('timer dropdowns list only countdowns', () => {

@@ -47,7 +47,9 @@ test('variables + feedback + big-digit presets', () => {
 	// timer_1 "Keynote" shows "0:12"
 	assert.deepEqual([v.timer_1_hh, v.timer_1_mm, v.timer_1_ss, v.timer_1_sign], ['00', '00', '12', ''])
 	assert.deepEqual([v.clock_tod_1_hh, v.clock_tod_1_mm, v.clock_tod_1_ampm], ['4', '05', 'PM'])
-	assert.deepEqual(runFeedback(self, 'clock_segment', { clock: 'timer-A', segment: 'ss', prefix: 'SEC ' }), { text: 'SEC 12' })
+	assert.deepEqual(runFeedback(self, 'clock_segment', { clock: 'timer-A', segment: 'ss', prefix: 'SEC ' }), {
+		text: 'SEC 12',
+	})
 	for (const s of ['hh', 'mm', 'ss']) assert.ok(`timer_1_big_${s}` in self._presets)
 
 	// offline → digits blank to "--", never a frozen time

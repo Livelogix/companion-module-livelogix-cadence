@@ -4,10 +4,7 @@
 	"page": {
 		"title": "Stage Manager",
 		"columns": 0,
-		"adjust": [
-			-60,
-			60
-		],
+		"adjust": [-60, 60],
 		"gridCols": 6,
 		"gridRows": 8
 	},
@@ -29,12 +26,7 @@
 			"progress": 0.979,
 			"endTime": "4:06 PM",
 			"undo": 31.2,
-			"presets": [
-				300,
-				null,
-				900,
-				null
-			]
+			"presets": [300, null, 900, null]
 		},
 		{
 			"id": "timer-B",
@@ -212,21 +204,9 @@
 			"id": "poll-1",
 			"name": "Lunch vote",
 			"question": "What’s for lunch?",
-			"options": [
-				"Sushi",
-				"Tacos",
-				"Pizza"
-			],
-			"counts": [
-				14,
-				20,
-				3
-			],
-			"percents": [
-				38,
-				54,
-				8
-			],
+			"options": ["Sushi", "Tacos", "Pizza"],
+			"counts": [14, 20, 3],
+			"percents": [38, 54, 8],
 			"total": 37,
 			"audience": 42,
 			"state": "open",

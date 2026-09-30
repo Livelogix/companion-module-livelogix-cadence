@@ -67,7 +67,10 @@ test('time shift + ProPresenter', async () => {
 		{ action: 'shiftRate', id: 'shift-1', value: 1.1 },
 		{ action: 'ppReset', clock: 'pp-1' },
 	])
-	assert.deepEqual(self._actions.propresenter_timer.options[0].choices.map((c) => c.id), ['pp-1'])
+	assert.deepEqual(
+		self._actions.propresenter_timer.options[0].choices.map((c) => c.id),
+		['pp-1'],
+	)
 })
 
 test('preset: flat picker selects then applies, legacy shape still works', async () => {
@@ -227,7 +230,8 @@ test('presets reference only real actions, feedbacks and variables', () => {
 		for (const step of p.steps)
 			for (const a of step.down) assert.ok(a.actionId in self._actions, `${id}: action ${a.actionId}`)
 		for (const f of p.feedbacks) assert.ok(f.feedbackId in self._feedbacks, `${id}: feedback ${f.feedbackId}`)
-		for (const [, vid] of p.style.text.matchAll(/\$\(cadence:([^)]+)\)/g)) assert.ok(varIds.has(vid), `${id}: variable ${vid}`)
+		for (const [, vid] of p.style.text.matchAll(/\$\(cadence:([^)]+)\)/g))
+			assert.ok(varIds.has(vid), `${id}: variable ${vid}`)
 	}
 })
 
