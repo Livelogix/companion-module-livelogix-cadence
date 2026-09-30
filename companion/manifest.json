@@ -14,7 +14,7 @@
 			"email": "support@livelogix.app"
 		}
 	],
-	"legacyIds": ["geertech-cadence"],
+	"legacyIds": [],
 	"runtime": {
 		"type": "node22",
 		"api": "nodejs-ipc",
