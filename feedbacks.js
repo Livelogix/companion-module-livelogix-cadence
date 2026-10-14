@@ -233,6 +233,26 @@ function setFeedbacks(self) {
 		(fb) => !!self.findById('schedules', fb.options.schedule)?.onDeckIsRunning,
 	)
 
+	f.schedule_pco = bool(
+		'Planning Center LIVE is…',
+		'Planning Center schedules: LIVE is running, or this Mac is the LIVE controller.',
+		GREEN,
+		WHITE,
+		[
+			picker('schedule', 'Schedule (Planning Center)', self.pcoScheduleChoices()),
+			select('when', 'When', 'live', [
+				['live', 'LIVE is running'],
+				['control', 'Cadence is in control'],
+				['canTake', 'Control can be taken'],
+			]),
+		],
+		(fb) => {
+			const pco = self.findById('schedules', fb.options.schedule)?.pco
+			if (!pco) return false
+			return { live: !!pco.live, control: !!pco.canControl, canTake: !!pco.canTakeControl }[fb.options.when] ?? false
+		},
+	)
+
 	f.schedule_can = bool(
 		'Schedule button is available',
 		'True when the chosen schedule action can run now (e.g. there IS a next cue).',
@@ -320,6 +340,46 @@ function setFeedbacks(self) {
 		WHITE,
 		[picker('clock', 'Cue Stack (timer)', self.cueStackChoices())],
 		(fb) => (self.findCueStack(fb.options.clock)?.cues?.length ?? 0) > 0,
+	)
+
+	f.cuestack_mode = bool(
+		'Cue Stack mode is…',
+		'True when the stack is in Cue mode (GO takes the top cue off) or Presets mode (the list stays).',
+		BLUE,
+		WHITE,
+		[
+			picker('clock', 'Cue Stack (timer)', self.cueStackChoices()),
+			select('mode', 'Mode', 'presets', [
+				['queue', 'Cue'],
+				['presets', 'Presets'],
+			]),
+		],
+		(fb) => {
+			const st = self.findCueStack(fb.options.clock)
+			if (!st) return false
+			return (st.mode === 'presets' ? 'presets' : 'queue') === fb.options.mode
+		},
+	)
+
+	f.cuestack_selected = bool(
+		'Cue Stack preset row is selected',
+		'Presets mode: true when the given row (1 = first) is the one GO will load.',
+		AMBER,
+		BLACK,
+		[
+			picker('clock', 'Cue Stack (timer)', self.cueStackChoices()),
+			{ type: 'number', id: 'row', label: 'Row (1 = first)', default: 1, min: 1, max: 50 },
+		],
+		(fb) => {
+			const st = self.findCueStack(fb.options.clock)
+			const cues = st?.cues ?? []
+			if (st?.mode !== 'presets' || !cues.length) return false
+			const sel = Math.max(
+				0,
+				cues.findIndex((c) => c.id === st.selected),
+			)
+			return sel === Number(fb.options.row) - 1
+		},
 	)
 
 	f.poll_state = bool(

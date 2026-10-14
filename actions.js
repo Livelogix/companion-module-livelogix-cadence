@@ -5,7 +5,7 @@
 //
 // Wire reference: AppModel.producerHandleCommand (Cadence) — each command is only
 // accepted for entities wired onto the targeted Producer page.
-const { parseDuration, parseTimeOfDay } = require('./helpers')
+const { arr, parseDuration, parseTimeOfDay } = require('./helpers')
 
 function picker(id, label, choices) {
 	return { type: 'dropdown', id, label, default: choices[0]?.id ?? '', choices, allowCustom: true }
@@ -274,6 +274,23 @@ function setActions(self) {
 		},
 	}
 
+	// Planning Center schedules: drive Services LIVE (the producer tile's controls).
+	actions.schedule_pco = {
+		name: 'Schedule: Planning Center LIVE (Back / Next / Take control)',
+		options: [
+			picker('schedule', 'Schedule (Planning Center)', self.pcoScheduleChoices()),
+			select('action', 'Action', 'pcoNext', [
+				['pcoNext', 'Next item'],
+				['pcoBack', 'Back one item'],
+				['pcoTakeControl', 'Take control of LIVE'],
+			]),
+		],
+		callback: async (event) => {
+			if (!event.options.schedule) return
+			await self.sendCommand({ action: event.options.action, schedule: event.options.schedule })
+		},
+	}
+
 	actions.schedule_jump = {
 		name: 'Schedule: Jump to cue',
 		options: [
@@ -428,15 +445,18 @@ function setActions(self) {
 	}
 
 	// ---- Cue Stack (queued times per timer, top first) -------------------------
+	// GO / Load use the stack's mode: Cue mode takes the top cue OFF the stack;
+	// Presets mode loads the selected cue (it stays) and selects the next row.
 	actions.cuestack_control = {
 		name: 'Cue Stack: GO / Load / Remove top / Clear',
 		options: [
 			picker('clock', 'Cue Stack (timer)', self.cueStackChoices()),
 			select('action', 'Action', 'stackGo', [
-				['stackGo', 'GO — load top cue and start'],
-				['stackLoad', 'Load top cue (don’t start)'],
+				['stackGo', 'GO — load the next cue and start'],
+				['stackLoad', 'Load the next cue (don’t start)'],
 				['stackRemove', 'Remove top cue'],
 				['stackClear', 'Clear the stack'],
+				['stackRestore', 'Restore from Cadence Show Setup (linked timers)'],
 			]),
 		],
 		callback: async (event) => {
@@ -469,6 +489,82 @@ function setActions(self) {
 		},
 	}
 
+	actions.cuestack_mode = {
+		name: 'Cue Stack: Mode (Cue / Presets)',
+		description:
+			'Cue: GO takes the top cue off the stack. Presets: the list stays, GO loads the selected cue and selects the next one.',
+		options: [
+			picker('clock', 'Cue Stack (timer)', self.cueStackChoices()),
+			select('mode', 'Mode', 'toggle', [
+				['queue', 'Cue'],
+				['presets', 'Presets'],
+				['toggle', 'Toggle Cue / Presets'],
+			]),
+		],
+		callback: async (event) => {
+			const clock = event.options.clock
+			if (!clock) return
+			let mode = event.options.mode
+			if (mode === 'toggle') mode = self.findCueStack(clock)?.mode === 'presets' ? 'queue' : 'presets'
+			await self.sendCommand({ action: 'stackMode', clock, mode })
+		},
+	}
+
+	// Presets mode: move the highlight (the cue GO loads). Picks a cue id from
+	// the current list; Cadence ignores a selection in Cue mode.
+	actions.cuestack_select = {
+		name: 'Cue Stack: Select a preset',
+		options: [
+			picker('clock', 'Cue Stack (timer)', self.cueStackChoices()),
+			select('which', 'Select', 'next', [
+				['next', 'Next row'],
+				['prev', 'Previous row'],
+				['first', 'First row'],
+				['last', 'Last row'],
+				['number', 'Row number…'],
+			]),
+			{
+				type: 'textinput',
+				id: 'number',
+				label: 'Row number (1 = first) — supports variables',
+				default: '1',
+				useVariables: true,
+				isVisible: (o) => o.which === 'number',
+			},
+		],
+		callback: async (event) => {
+			const clock = event.options.clock
+			const st = self.findCueStack(clock)
+			const cues = arr(st?.cues)
+			if (!clock || !cues.length) return
+			const cur = Math.max(
+				0,
+				cues.findIndex((c) => c.id === st.selected),
+			)
+			let i
+			switch (event.options.which) {
+				case 'next':
+					i = Math.min(cur + 1, cues.length - 1)
+					break
+				case 'prev':
+					i = Math.max(cur - 1, 0)
+					break
+				case 'first':
+					i = 0
+					break
+				case 'last':
+					i = cues.length - 1
+					break
+				default: {
+					const n = Number(await self.parseVariablesInString(String(event.options.number)))
+					if (!Number.isInteger(n) || n < 1 || n > cues.length) return
+					i = n - 1
+				}
+			}
+			await self.sendCommand({ action: 'stackSelect', clock, cue: cues[i].id })
+		},
+	}
+
 	// ---- Audience polls --------------------------------------------------------------
 	actions.poll_control = {
 		name: 'Poll: Open / Close / Next / Reveal …',
@@ -485,6 +581,7 @@ function setActions(self) {
 				['hide', 'Hide results on screen'],
 				['toggleReveal', 'Toggle on-screen reveal'],
 				['pollReset', 'Reset votes (this question)'],
+				['pollReportClear', 'Clear the poll report'],
 			]),
 		],
 		callback: async (event) => {
@@ -517,6 +614,47 @@ function setActions(self) {
 			const n = Number(await self.parseVariablesInString(String(event.options.number)))
 			if (!Number.isInteger(n) || n < 1) return
 			await self.sendCommand({ action: 'pollGo', poll: event.options.poll, index: n - 1 })
+		},
+	}
+
+	// Open-answer questions (the current question must be open-answer).
+	actions.poll_open_answers = {
+		name: 'Poll: Open answers — profanity filter / answers per phone',
+		options: [
+			picker('poll', 'Poll', self.pollChoices()),
+			select('what', 'Setting', 'filterToggle', [
+				['filterOn', 'Profanity filter: on'],
+				['filterOff', 'Profanity filter: off'],
+				['filterToggle', 'Profanity filter: toggle'],
+				['perPhone', 'Answers per phone…'],
+			]),
+			{
+				type: 'number',
+				id: 'n',
+				label: 'Answers per phone (0 = unlimited)',
+				default: 3,
+				min: 0,
+				max: 20,
+				isVisible: (o) => o.what === 'perPhone',
+			},
+		],
+		callback: async (event) => {
+			const poll = event.options.poll
+			if (!poll) return
+			const p = self.findById('polls', poll)
+			switch (event.options.what) {
+				case 'filterOn':
+					return self.sendCommand({ action: 'pollSetFilter', poll, on: true })
+				case 'filterOff':
+					return self.sendCommand({ action: 'pollSetFilter', poll, on: false })
+				case 'filterToggle':
+					return self.sendCommand({ action: 'pollSetFilter', poll, on: p?.filter === false })
+				default: {
+					const n = Number(event.options.n)
+					if (!Number.isInteger(n) || n < 0 || n > 20) return
+					return self.sendCommand({ action: 'pollSetPerPhone', poll, n })
+				}
+			}
 		},
 	}
 

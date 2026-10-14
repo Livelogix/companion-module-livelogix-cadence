@@ -43,12 +43,16 @@ Every timer action has an **override ID** field that accepts variables.
 
 - **Preset:** load a bank preset into its wired timers — Set, Set & Start, or Arm only.
 - **Schedule:** Set / Set & Start / Set, Start & advance / Add to Cue Stack / Next / Previous / Correct to sheet start or end / Refresh from Google Sheet; **Jump to cue** by sheet cue # or row.
+- **Schedule — Planning Center LIVE:** Next item / Back / Take control (schedules linked to Planning Center).
 - **Scheduler:** Arm / Disarm / Toggle / Fire next row.
 - **Scene:** Recall; Undo last recall.
 - **Message:** Hidden / Shown / Flashing / Toggle; Set text (optionally put on air).
 - **Automation:** Arm / Disarm / Toggle; Set trigger time.
-- **Cue Stack:** GO / Load / Remove top / Clear; Add a time.
-- **Poll:** Open / Close / Toggle / Ready / Next / Previous / Reveal / Hide / Toggle reveal / Reset votes; Go to question #; Results on phones (never / after voting / live).
+- **Cue Stack:** GO / Load / Remove top / Clear / Restore from Cadence Show Setup; Add a time.
+- **Cue Stack — Mode:** Cue / Presets / Toggle. In **Cue** mode GO takes the top cue off the stack. In **Presets** mode the list stays: GO loads the selected cue and selects the next row.
+- **Cue Stack — Select a preset:** next / previous / first / last row, or a row number (Presets mode).
+- **Poll:** Open / Close / Toggle / Ready / Next / Previous / Reveal / Hide / Toggle reveal / Reset votes / Clear the poll report; Go to question #; Results on phones (never / after voting / live).
+- **Poll — Open answers:** profanity filter on / off / toggle and answers per phone (0 = no limit), for the current open-answer question.
 - **Poll — Simulate votes (rehearsal):** Start / Stop / Toggle; reveal, hide or toggle the simulated results; set the simulated voting state (ready / open / closed). Fake votes stream in for about 5 s, then reveal, so you can rehearse the graphics. Real votes are never touched, and phones mark the tally "simulated". If Simulate is switched off for the Producer page, Cadence refuses and the connection log says so.
 - **Time Shift:** set rehearsal rate (1 = real time).
 - **ProPresenter:** Start / Stop / Reset a ProPresenter timer (clock in control mode).
@@ -63,7 +67,8 @@ Every timer action has an **override ID** field that accepts variables.
 - **Schedule behind / ahead by N s**, **On-deck cue is the running one**, **Schedule button available** (Set / Next / Prev).
 - **Scheduler armed**, **Automation armed**, **Automation fires within a minute**.
 - **Scene recall can be undone**, **Message on-air state**.
-- **Cue Stack has cues**.
+- **Cue Stack has cues**, **Cue Stack mode is** (Cue / Presets), **Cue Stack preset row is selected**.
+- **Planning Center LIVE is** running / Cadence is in control / control can be taken.
 - **Poll state** (ready / open / closed), **Poll revealed**, **Poll room live**, **Poll is simulating** (any phase / votes streaming / simulated results revealed).
 - **Output is on**, **Output is showing…** (read-only status).
 - **Time Shift active**, **Cadence offline**.
@@ -77,8 +82,9 @@ Every timer action has an **override ID** field that accepts variables.
 - **Scheduler:** `scheduler_<id>_armed`, `_next_title`, `_next_trigger`, `_live_tc`
 - **Automation:** `automation_<id>_armed`, `_time`, `_countdown`
 - **Message:** `message_<id>_text`, `_vis` · **Scene:** `scene_<id>_ready`
-- **Cue Stack (by timer id):** `cuestack_<id>_count`, `_next`
-- **Poll:** `poll_<id>_question`, `_state`, `_position`, `_votes`, `_audience`, `_leader`, `_leader_percent`, `_revealed`, `_join_url`, `_simulating`, `_sim_state` (while simulating, `_votes` / `_leader` show the fake tally)
+- **Cue Stack (by timer id):** `cuestack_<id>_count`, `_next` (the cue GO loads), `_mode`, `_selected_position`
+- **Planning Center schedules:** `schedule_<id>_pco_live`, `_pco_current`, `_pco_remaining`, `_pco_next`, `_pco_controller`
+- **Poll:** `poll_<id>_question`, `_state`, `_position`, `_votes`, `_audience`, `_leader`, `_leader_percent`, `_revealed`, `_join_url`, `_simulating`, `_sim_state` (while simulating, `_votes` / `_leader` show the fake tally), `_kind` (choice / open), `_filter`, `_per_phone`
 - **Time Shift:** `shift_<id>_rate` · **Cue light:** `cuelight_<id>_color`
 - **Output (Whole show, read-only):** `output_<id>_name`, `_enabled`, `_kind`, `_source`, `_feeds`
 
@@ -88,4 +94,4 @@ While Cadence is unreachable, live times read `--:--` (segments `--`) rather tha
 
 ## Presets
 
-Ready-made buttons for everything on the page: per timer (Start/Pause with live time and state colours, on-screen-colour mirror, **big digits**: hours, minutes and seconds on three keys, Reset, ±1:00, Undo), per schedule (GO on-deck, Next, Prev, ahead/behind readout), per cue stack (GO with count), per poll (Open/Close, Reveal, Next/Prev, Simulate start/stop, simulated reveal, leader readout), messages, scenes, automations, schedulers, presets, Time Shift rates, ProPresenter controls, cue-light tallies, output status buttons (Whole show) and a status button.
+Ready-made buttons for everything on the page: per timer (Start/Pause with live time and state colours, on-screen-colour mirror, **big digits**: hours, minutes and seconds on three keys, Reset, ±1:00, Undo), per schedule (GO on-deck, Next, Prev, ahead/behind readout), per cue stack (GO with count, Cue / Presets mode, select previous / next preset), per Planning Center schedule (LIVE Next / Back / Take control), per poll (Open/Close, Reveal, Next/Prev, Simulate start/stop, simulated reveal, leader readout), messages, scenes, automations, schedulers, presets, Time Shift rates, ProPresenter controls, cue-light tallies, output status buttons (Whole show) and a status button.

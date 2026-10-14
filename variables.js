@@ -93,6 +93,12 @@ const ENTITY_VARS = [
 			['drift', 'drift (+behind / -ahead, m:ss)', (s) => fmtDrift(s.driftSeconds)],
 			['drift_seconds', 'drift (seconds, + = behind)', (s) => (s.driftSeconds == null ? '' : s.driftSeconds)],
 			['sync', 'Google Sheet sync marker', (s) => s.syncMarker || ''],
+			// Planning Center schedules only (empty otherwise).
+			['pco_live', 'Planning Center LIVE running (yes/no)', (s) => (s.pco ? yesNo(s.pco.live) : '')],
+			['pco_current', 'Planning Center LIVE item', (s) => s.pco?.current || ''],
+			['pco_remaining', 'Planning Center item time left (m:ss)', (s) => pcoRemaining(s.pco)],
+			['pco_next', 'Planning Center next item', (s) => s.pco?.next || ''],
+			['pco_controller', 'Planning Center LIVE controller', (s) => s.pco?.controller || ''],
 		],
 	],
 	[
@@ -144,7 +150,9 @@ const ENTITY_VARS = [
 		[
 			['name', 'name', (s) => s.name || s.clock],
 			['count', 'cues queued', (s) => arr(s.cues).length],
-			['next', 'top cue (next GO)', (s) => topCue(s)],
+			['next', 'next cue GO loads (top, or the selected preset)', (s) => nextCue(s)],
+			['mode', 'mode (Cue / Presets)', (s) => (s.mode === 'presets' ? 'Presets' : 'Cue')],
+			['selected_position', 'selected preset ("2 / 5", Presets mode)', (s) => selectedPosition(s)],
 		],
 	],
 	[
@@ -164,6 +172,13 @@ const ENTITY_VARS = [
 			['join_url', 'voting link', (p) => p.joinURL || ''],
 			// While simulating, votes/leader above are the FAKE tally.
 			['simulating', 'showing simulated votes (yes/no)', (p) => yesNo(p.simulating)],
+			['kind', 'current question type (choice/open)', (p) => p.kind || 'choice'],
+			[
+				'filter',
+				'open answers: profanity filter (on/off)',
+				(p) => (p.kind === 'open' ? (p.filter === false ? 'off' : 'on') : ''),
+			],
+			['per_phone', 'open answers per phone (0 = no limit)', (p) => (p.kind === 'open' ? (p.perPhone ?? '') : '')],
 			['sim_state', 'simulation (off / ready / open / closed)', (p) => (p.simulating ? p.simState || 'on' : 'off')],
 		],
 	],
@@ -182,10 +197,30 @@ const ENTITY_VARS = [
 	],
 ]
 
-function topCue(stack) {
-	const c = arr(stack.cues)[0]
+// The cue GO loads: the top one in Cue mode, the selected one in Presets mode
+// (Cadence falls back to the first row when nothing is selected).
+function nextCueEntry(stack) {
+	const cues = arr(stack.cues)
+	if (stack.mode === 'presets') return cues.find((c) => c.id === stack.selected) || cues[0]
+	return cues[0]
+}
+function nextCue(stack) {
+	const c = nextCueEntry(stack)
 	if (!c) return ''
 	return c.label ? `${c.label} (${fmtHMS(c.seconds)})` : fmtHMS(c.seconds)
+}
+function selectedPosition(stack) {
+	const cues = arr(stack.cues)
+	if (stack.mode !== 'presets' || !cues.length) return ''
+	const c = nextCueEntry(stack)
+	return `${cues.indexOf(c) + 1} / ${cues.length}`
+}
+// Item time left (negative = over), or how long an un-timed item has run.
+function pcoRemaining(pco) {
+	if (!pco) return ''
+	if (pco.remaining != null) return fmtHMS(pco.remaining)
+	if (pco.elapsed != null) return fmtHMS(pco.elapsed)
+	return ''
 }
 
 function leaderIndex(p) {

@@ -181,6 +181,71 @@ function setPresets(self) {
 			[act('cuestack_control', { clock: st.clock, action: 'stackGo' })],
 			[{ feedbackId: 'cuestack_has_cues', options: { clock: st.clock }, style: { bgcolor: GREEN, color: WHITE } }],
 		)
+		presets[`stack_${k}_mode`] = button(
+			`Cue Stack: ${st.name || st.clock}`,
+			'Mode: Cue / Presets (toggle)',
+			`MODE\n${v(`cuestack_${k}_mode`)}`,
+			[act('cuestack_mode', { clock: st.clock, mode: 'toggle' })],
+			[
+				{
+					feedbackId: 'cuestack_mode',
+					options: { clock: st.clock, mode: 'presets' },
+					style: { bgcolor: BLUE, color: WHITE },
+				},
+			],
+		)
+		presets[`stack_${k}_sel_prev`] = button(
+			`Cue Stack: ${st.name || st.clock}`,
+			'Presets: select previous row',
+			`▲ PRESET\n${v(`cuestack_${k}_selected_position`)}`,
+			[act('cuestack_select', { clock: st.clock, which: 'prev', number: '1' })],
+		)
+		presets[`stack_${k}_sel_next`] = button(
+			`Cue Stack: ${st.name || st.clock}`,
+			'Presets: select next row',
+			`▼ PRESET\n${v(`cuestack_${k}_selected_position`)}`,
+			[act('cuestack_select', { clock: st.clock, which: 'next', number: '1' })],
+		)
+	}
+
+	// ---- Planning Center LIVE (schedules linked to Planning Center) ---------------------------
+	for (const s of self.state.schedules.filter((x) => x.pco)) {
+		const cat = `Schedule: ${s.name || s.id}`
+		const k = key(s.id)
+		presets[`pco_${k}_next`] = button(
+			cat,
+			'Planning Center LIVE: Next item',
+			`LIVE ▶\n${v(`schedule_${k}_pco_remaining`)}`,
+			[act('schedule_pco', { schedule: s.id, action: 'pcoNext' })],
+			[
+				{
+					feedbackId: 'schedule_pco',
+					options: { schedule: s.id, when: 'live' },
+					style: { bgcolor: GREEN, color: WHITE },
+				},
+			],
+		)
+		presets[`pco_${k}_back`] = button(
+			cat,
+			'Planning Center LIVE: Back',
+			'LIVE ◀',
+			[act('schedule_pco', { schedule: s.id, action: 'pcoBack' })],
+			[],
+			{ size: SIZE.small },
+		)
+		presets[`pco_${k}_take`] = button(
+			cat,
+			'Planning Center LIVE: Take control',
+			'TAKE\nLIVE',
+			[act('schedule_pco', { schedule: s.id, action: 'pcoTakeControl' })],
+			[
+				{
+					feedbackId: 'schedule_pco',
+					options: { schedule: s.id, when: 'control' },
+					style: { bgcolor: GREEN, color: WHITE },
+				},
+			],
+		)
 	}
 
 	// ---- Polls ------------------------------------------------------------------------------

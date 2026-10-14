@@ -299,6 +299,12 @@ const methods = {
 	scheduleChoices() {
 		return choice(this.state.schedules)
 	},
+	// Planning Center schedules (they carry Services LIVE state); all schedules
+	// until one reports it, so a button can be set up before LIVE is connected.
+	pcoScheduleChoices() {
+		const pco = arr(this.state.schedules).filter((s) => s.pco)
+		return choice(pco.length ? pco : this.state.schedules)
+	},
 	schedulerChoices() {
 		return choice(this.state.schedulers)
 	},
