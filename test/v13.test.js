@@ -1,5 +1,5 @@
 // 1.3: Cue Stack Cue / Presets modes, Planning Center LIVE controls, poll
-// open-answer settings + report clear — wire bodies, feedbacks and variables.
+// open-answer settings + report clear, selected answer show / hide — wire bodies, feedbacks and variables.
 const { test, before, after, beforeEach } = require('node:test')
 const assert = require('node:assert/strict')
 const { startMockCadence } = require('./mock-cadence')
@@ -43,7 +43,16 @@ SNAP.schedules.push({
 		canNext: true,
 	},
 })
-SNAP.polls.push({ ...SNAP.polls[0], id: 'poll-open', name: 'Q&A', kind: 'open', filter: false, perPhone: 0 })
+SNAP.polls.push({
+	...SNAP.polls[0],
+	id: 'poll-open',
+	name: 'Q&A',
+	kind: 'open',
+	filter: false,
+	perPhone: 0,
+	featured: 'k1',
+	featuredText: 'Inspiring',
+})
 
 let mock, self
 before(async () => {
@@ -152,4 +161,24 @@ test('polls: report clear, open-answer filter / per phone', async () => {
 	assert.equal(v.poll_poll_open_filter, 'off')
 	assert.equal(v.poll_poll_open_per_phone, 0)
 	assert.equal(v.poll_poll_1_filter, '')
+})
+
+test('polls: selected answer show / hide / toggle', async () => {
+	await runAction(self, 'poll_featured', { poll: 'poll-open', what: 'top' })
+	await runAction(self, 'poll_featured', { poll: 'poll-open', what: 'rank', rank: '3' })
+	await runAction(self, 'poll_featured', { poll: 'poll-open', what: 'rank', rank: '0' })
+	await runAction(self, 'poll_featured', { poll: 'poll-open', what: 'hide' })
+	await runAction(self, 'poll_featured', { poll: 'poll-open', what: 'toggle' })
+	await runAction(self, 'poll_featured', { poll: 'poll-1', what: 'toggle' })
+	assert.deepEqual(sent(), [
+		{ action: 'pollFeature', poll: 'poll-open', n: 1 },
+		{ action: 'pollFeature', poll: 'poll-open', n: 3 },
+		{ action: 'pollUnfeature', poll: 'poll-open' },
+		{ action: 'pollUnfeature', poll: 'poll-open' },
+		{ action: 'pollFeature', poll: 'poll-1', n: 1 },
+	])
+	assert.equal(runFeedback(self, 'poll_featured', { poll: 'poll-open' }), true)
+	assert.equal(runFeedback(self, 'poll_featured', { poll: 'poll-1' }), false)
+	assert.equal(self._varValues.poll_poll_open_featured, 'Inspiring')
+	assert.equal(self._varValues.poll_poll_1_featured, '')
 })

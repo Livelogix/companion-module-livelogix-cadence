@@ -173,6 +173,7 @@ const ENTITY_VARS = [
 			// While simulating, votes/leader above are the FAKE tally.
 			['simulating', 'showing simulated votes (yes/no)', (p) => yesNo(p.simulating)],
 			['kind', 'current question type (choice/open)', (p) => p.kind || 'choice'],
+			['featured', 'selected answer on screen (open answers)', (p) => p.featuredText || ''],
 			[
 				'filter',
 				'open answers: profanity filter (on/off)',

@@ -275,6 +275,13 @@ function setPresets(self) {
 		presets[`poll_${k}_prev`] = button(cat, 'Previous question', `PREV Q\\n${v(`poll_${k}_position`)}`, [
 			act('poll_control', { poll: p.id, action: 'pollPrev' }),
 		])
+		presets[`poll_${k}_featured`] = button(
+			cat,
+			'Selected answer: show top / hide (open answers)',
+			`ANSWER\\n${v(`poll_${k}_featured`)}`,
+			[act('poll_featured', { poll: p.id, what: 'toggle', rank: '1' })],
+			[{ feedbackId: 'poll_featured', options: { poll: p.id }, style: { bgcolor: BLUE, color: WHITE } }],
+		)
 		presets[`poll_${k}_simulate`] = button(
 			cat,
 			'Simulate votes (start / stop)',

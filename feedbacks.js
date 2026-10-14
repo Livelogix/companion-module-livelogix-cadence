@@ -382,6 +382,15 @@ function setFeedbacks(self) {
 		},
 	)
 
+	f.poll_featured = bool(
+		'Poll selected answer is on screen',
+		'True while an open answer is shown on the poll graphic (Selected answer).',
+		BLUE,
+		WHITE,
+		[picker('poll', 'Poll', self.pollChoices())],
+		(fb) => !!self.findById('polls', fb.options.poll)?.featured,
+	)
+
 	f.poll_state = bool(
 		'Poll voting state is…',
 		'True when the poll is ready / open / closed.',

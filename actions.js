@@ -658,6 +658,49 @@ function setActions(self) {
 		},
 	}
 
+	// Selected answer: put one open answer on the poll's on-screen graphic (the
+	// Poll Results page's Show / Hide). Needs Cadence with pollFeature.
+	actions.poll_featured = {
+		name: 'Poll: Selected answer — show / hide on screen',
+		options: [
+			picker('poll', 'Poll', self.pollChoices()),
+			select('what', 'Action', 'top', [
+				['top', 'Show the top answer'],
+				['rank', 'Show answer by rank…'],
+				['hide', 'Hide the selected answer'],
+				['toggle', 'Toggle: show the top answer / hide'],
+			]),
+			{
+				type: 'textinput',
+				id: 'rank',
+				label: 'Rank (1 = most votes) — supports variables',
+				default: '1',
+				useVariables: true,
+				isVisible: (o) => o.what === 'rank',
+			},
+		],
+		callback: async (event) => {
+			const poll = event.options.poll
+			if (!poll) return
+			const p = self.findById('polls', poll)
+			switch (event.options.what) {
+				case 'hide':
+					return self.sendCommand({ action: 'pollUnfeature', poll })
+				case 'toggle':
+					return self.sendCommand(
+						p?.featured ? { action: 'pollUnfeature', poll } : { action: 'pollFeature', poll, n: 1 },
+					)
+				case 'rank': {
+					const n = Number(await self.parseVariablesInString(String(event.options.rank)))
+					if (!Number.isInteger(n) || n < 1) return
+					return self.sendCommand({ action: 'pollFeature', poll, n })
+				}
+				default:
+					return self.sendCommand({ action: 'pollFeature', poll, n: 1 })
+			}
+		},
+	}
+
 	actions.poll_results_mode = {
 		name: 'Poll: Results on phones',
 		options: [

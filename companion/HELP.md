@@ -52,6 +52,7 @@ Every timer action has an **override ID** field that accepts variables.
 - **Cue Stack — Mode:** Cue / Presets / Toggle. In **Cue** mode GO takes the top cue off the stack. In **Presets** mode the list stays: GO loads the selected cue and selects the next row.
 - **Cue Stack — Select a preset:** next / previous / first / last row, or a row number (Presets mode).
 - **Poll:** Open / Close / Toggle / Ready / Next / Previous / Reveal / Hide / Toggle reveal / Reset votes / Clear the poll report; Go to question #; Results on phones (never / after voting / live).
+- **Poll — Selected answer:** show the top answer, or one by rank, on the poll's on-screen graphic; hide it; or toggle (needs a Cadence release newer than 0.5.1).
 - **Poll — Open answers:** profanity filter on / off / toggle and answers per phone (0 = no limit), for the current open-answer question.
 - **Poll — Simulate votes (rehearsal):** Start / Stop / Toggle; reveal, hide or toggle the simulated results; set the simulated voting state (ready / open / closed). Fake votes stream in for about 5 s, then reveal, so you can rehearse the graphics. Real votes are never touched, and phones mark the tally "simulated". If Simulate is switched off for the Producer page, Cadence refuses and the connection log says so.
 - **Time Shift:** set rehearsal rate (1 = real time).
@@ -69,7 +70,7 @@ Every timer action has an **override ID** field that accepts variables.
 - **Scene recall can be undone**, **Message on-air state**.
 - **Cue Stack has cues**, **Cue Stack mode is** (Cue / Presets), **Cue Stack preset row is selected**.
 - **Planning Center LIVE is** running / Cadence is in control / control can be taken.
-- **Poll state** (ready / open / closed), **Poll revealed**, **Poll room live**, **Poll is simulating** (any phase / votes streaming / simulated results revealed).
+- **Poll state** (ready / open / closed), **Poll revealed**, **Poll room live**, **Poll selected answer is on screen**, **Poll is simulating** (any phase / votes streaming / simulated results revealed).
 - **Output is on**, **Output is showing…** (read-only status).
 - **Time Shift active**, **Cadence offline**.
 
@@ -84,7 +85,7 @@ Every timer action has an **override ID** field that accepts variables.
 - **Message:** `message_<id>_text`, `_vis` · **Scene:** `scene_<id>_ready`
 - **Cue Stack (by timer id):** `cuestack_<id>_count`, `_next` (the cue GO loads), `_mode`, `_selected_position`
 - **Planning Center schedules:** `schedule_<id>_pco_live`, `_pco_current`, `_pco_remaining`, `_pco_next`, `_pco_controller`
-- **Poll:** `poll_<id>_question`, `_state`, `_position`, `_votes`, `_audience`, `_leader`, `_leader_percent`, `_revealed`, `_join_url`, `_simulating`, `_sim_state` (while simulating, `_votes` / `_leader` show the fake tally), `_kind` (choice / open), `_filter`, `_per_phone`
+- **Poll:** `poll_<id>_question`, `_state`, `_position`, `_votes`, `_audience`, `_leader`, `_leader_percent`, `_revealed`, `_join_url`, `_simulating`, `_sim_state` (while simulating, `_votes` / `_leader` show the fake tally), `_kind` (choice / open), `_featured` (the selected answer on screen), `_filter`, `_per_phone`
 - **Time Shift:** `shift_<id>_rate` · **Cue light:** `cuelight_<id>_color`
 - **Output (Whole show, read-only):** `output_<id>_name`, `_enabled`, `_kind`, `_source`, `_feeds`
 
