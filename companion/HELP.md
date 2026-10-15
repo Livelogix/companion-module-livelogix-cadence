@@ -48,6 +48,7 @@ Every timer action has an **override ID** field that accepts variables.
 - **Scene:** Recall; Undo last recall.
 - **Message:** Hidden / Shown / Flashing / Toggle; Set text (optionally put on air).
 - **Automation:** Arm / Disarm / Toggle; Set trigger time.
+- **Stopwatch: Mark** — records the elapsed time of a Stopwatch source (a lap). Start / Pause / Reset are the Timer actions. Needs a Cadence release newer than 0.5.1.
 - **Cue Stack:** GO / Load / Remove top / Clear / Restore from Cadence Show Setup; Add a time.
 - **Cue Stack — Mode:** Cue / Presets / Toggle. In **Cue** mode GO takes the top cue off the stack. In **Presets** mode the list stays: GO loads the selected cue and selects the next row.
 - **Cue Stack — Select a preset:** next / previous / first / last row, or a row number (Presets mode).
@@ -83,6 +84,7 @@ Every timer action has an **override ID** field that accepts variables.
 - **Scheduler:** `scheduler_<id>_armed`, `_next_title`, `_next_trigger`, `_live_tc`
 - **Automation:** `automation_<id>_armed`, `_time`, `_countdown`
 - **Message:** `message_<id>_text`, `_vis` · **Scene:** `scene_<id>_ready`
+- **Stopwatch (by clock id):** `stopwatch_<id>_marks` (marks so far), `_last` (newest mark), `_last_split`, `_mark_1` … `_mark_5` (newest first: "6 · 1:15.0 (+0:01.2)")
 - **Cue Stack (by timer id):** `cuestack_<id>_count`, `_next` (the cue GO loads), `_mode`, `_selected_position`
 - **Planning Center schedules:** `schedule_<id>_pco_live`, `_pco_current`, `_pco_remaining`, `_pco_next`, `_pco_controller`
 - **Poll:** `poll_<id>_question`, `_state`, `_position`, `_votes`, `_audience`, `_leader`, `_leader_percent`, `_revealed`, `_join_url`, `_simulating`, `_sim_state` (while simulating, `_votes` / `_leader` show the fake tally), `_kind` (choice / open), `_featured` (the selected answer on screen), `_filter`, `_per_phone`
@@ -95,4 +97,4 @@ While Cadence is unreachable, live times read `--:--` (segments `--`) rather tha
 
 ## Presets
 
-Ready-made buttons for everything on the page: per timer (Start/Pause with live time and state colours, on-screen-colour mirror, **big digits**: hours, minutes and seconds on three keys, Reset, ±1:00, Undo), per schedule (GO on-deck, Next, Prev, ahead/behind readout), per cue stack (GO with count, Cue / Presets mode, select previous / next preset), per Planning Center schedule (LIVE Next / Back / Take control), per poll (Open/Close, Reveal, Next/Prev, Simulate start/stop, simulated reveal, leader readout), messages, scenes, automations, schedulers, presets, Time Shift rates, ProPresenter controls, cue-light tallies, output status buttons (Whole show) and a status button.
+Ready-made buttons for everything on the page: per timer (Start/Pause with live time and state colours, MARK for a Stopwatch, on-screen-colour mirror, **big digits**: hours, minutes and seconds on three keys, Reset, ±1:00, Undo), per schedule (GO on-deck, Next, Prev, ahead/behind readout), per cue stack (GO with count, Cue / Presets mode, select previous / next preset), per Planning Center schedule (LIVE Next / Back / Take control), per poll (Open/Close, Reveal, Next/Prev, Simulate start/stop, simulated reveal, leader readout), messages, scenes, automations, schedulers, presets, Time Shift rates, ProPresenter controls, cue-light tallies, output status buttons (Whole show) and a status button.

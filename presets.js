@@ -54,6 +54,16 @@ function setPresets(self) {
 				{ feedbackId: 'timer_mood', options: { clock: c.id, mood: 'expired' }, style: { bgcolor: RED, color: WHITE } },
 			],
 		)
+		if (c.stopwatch) {
+			// Stopwatch: MARK records the elapsed time (lit while it runs) and shows the newest mark.
+			presets[`timer_${n}_mark`] = button(
+				cat,
+				'Stopwatch: MARK + newest mark',
+				`MARK\\n${v(`stopwatch_${key(c.id)}_last`)}`,
+				[act('stopwatch_mark', pick)],
+				[{ feedbackId: 'timer_running', options: { clock: c.id }, style: { bgcolor: BLUE, color: WHITE } }],
+			)
+		}
 		presets[`timer_${n}_mirror`] = button(
 			cat,
 			'Live time in the on-screen colour',

@@ -27,6 +27,18 @@ SNAP.cueStacks.push({
 		{ id: 'p3', seconds: 600, label: null },
 	],
 })
+// timer-B is a Stopwatch with three marks (newest first).
+Object.assign(
+	SNAP.clocks.find((c) => c.id === 'timer-B'),
+	{
+		stopwatch: true,
+		marks: [
+			{ n: 3, elapsed: 75.04, split: 1.2 },
+			{ n: 2, elapsed: 73.84, split: 13.84 },
+			{ n: 1, elapsed: 60, split: 60 },
+		],
+	},
+)
 SNAP.schedules.push({
 	id: 'pco-1',
 	name: 'Sunday 9am',
@@ -181,4 +193,22 @@ test('polls: selected answer show / hide / toggle', async () => {
 	assert.equal(runFeedback(self, 'poll_featured', { poll: 'poll-1' }), false)
 	assert.equal(self._varValues.poll_poll_open_featured, 'Inspiring')
 	assert.equal(self._varValues.poll_poll_1_featured, '')
+})
+
+test('stopwatch: Mark action, choices, variables, preset', async () => {
+	assert.deepEqual(
+		self.stopwatchChoices().map((c) => c.id),
+		['timer-B'],
+	)
+	await runAction(self, 'stopwatch_mark', { pick: 'timer-B', overrideId: '' })
+	assert.deepEqual(sent(), [{ action: 'mark', clock: 'timer-B' }])
+	const v = self._varValues
+	assert.equal(v.stopwatch_timer_b_marks, 3)
+	assert.equal(v.stopwatch_timer_b_last, '1:15.0')
+	assert.equal(v.stopwatch_timer_b_last_split, '0:01.2')
+	assert.equal(v.stopwatch_timer_b_mark_1, '3 · 1:15.0 (+0:01.2)')
+	assert.equal(v.stopwatch_timer_b_mark_3, '1 · 1:00.0 (+1:00.0)')
+	assert.equal(v.stopwatch_timer_b_mark_4, '')
+	assert.ok(!('stopwatch_timer_a_last' in v), 'only stopwatches get the marks variables')
+	assert.ok(Object.values(self._presets).some((p) => p.steps[0].down[0]?.actionId === 'stopwatch_mark'))
 })

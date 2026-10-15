@@ -240,7 +240,7 @@ const methods = {
 				.map((x) => `${extra ? extra(x) : x.id}=${x.name ?? ''}`)
 				.join(',')
 		return [
-			ids(s.clocks, (c) => `${c.id}:${c.kind}:${c.ppControl ? 'pp' : ''}`),
+			ids(s.clocks, (c) => `${c.id}:${c.kind}:${c.ppControl ? 'pp' : ''}:${c.stopwatch ? 'sw' : ''}`),
 			ids(s.shifts),
 			ids(s.cueLights),
 			ids(
@@ -267,6 +267,10 @@ const methods = {
 
 	timerChoices() {
 		return choice(this.timers())
+	},
+	// Stopwatch sources (timers that always count up, with Mark).
+	stopwatchChoices() {
+		return choice(this.timers().filter((c) => c.stopwatch))
 	},
 	clockChoices() {
 		return choice(this.state.clocks, (c) => `${c.name || c.id} (${c.kind})`)

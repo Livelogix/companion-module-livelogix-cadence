@@ -54,6 +54,18 @@ function setActions(self) {
 		},
 	}
 
+	// A Stopwatch source's Mark: records the elapsed time (a lap). Start / Pause /
+	// Reset are the timer actions above. Needs a Cadence release with Stopwatch.
+	actions.stopwatch_mark = {
+		name: 'Stopwatch: Mark (record the elapsed time)',
+		options: [picker('pick', 'Stopwatch', self.stopwatchChoices()), idField('Stopwatch')],
+		callback: async (event) => {
+			const clock = await resolveOverride(self, event.options)
+			if (!clock) return
+			await self.sendCommand({ action: 'mark', clock })
+		},
+	}
+
 	actions.timer_adjust = {
 		name: 'Timer: Adjust time (± seconds)',
 		options: [

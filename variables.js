@@ -33,8 +33,24 @@ function fmtDrift(d) {
 	return (d > 0 ? '+' : '-') + fmtHMS(Math.abs(d))
 }
 
-// The per-entity variable table: [prefix, stateKey, keyOf, [[suffix, name, value(x)], …]].
 // Declaring and valuing from one table keeps the two in lockstep.
+// A stopwatch mark's time to the tenth: "1:05.3", "1:02:05.3".
+function markText(sec) {
+	const t = Math.floor(Math.max(0, Number(sec) || 0) * 10)
+	const d = t % 10
+	const s = Math.floor(t / 10)
+	const h = Math.floor(s / 3600)
+	const m = Math.floor((s % 3600) / 60)
+	const p2 = (n) => String(n).padStart(2, '0')
+	return (h > 0 ? `${h}:${p2(m)}` : String(m)) + `:${p2(s % 60)}.${d}`
+}
+// Mark N (1 = newest) as "6 · 1:15.0 (+0:01.2)", or "" if there isn't one.
+function markLine(c, i) {
+	const m = arr(c.marks)[i]
+	return m ? `${m.n} · ${markText(m.elapsed)} (+${markText(m.split)})` : ''
+}
+
+// The per-entity variable table: [prefix, stateKey, keyOf, [[suffix, name, value(x)], …], filter?].
 const ENTITY_VARS = [
 	[
 		'clock',
@@ -142,6 +158,27 @@ const ENTITY_VARS = [
 			['name', 'name', (s) => s.name || s.id],
 			['ready', 'saved and ready (yes/no)', (s) => yesNo(s.ready)],
 		],
+	],
+	[
+		// Stopwatch sources (timers flagged stopwatch): the marks, newest first.
+		'stopwatch',
+		'clocks',
+		(c) => c.id,
+		[
+			['marks', "marks so far (the newest mark's number)", (c) => arr(c.marks)[0]?.n ?? 0],
+			['last', 'newest mark (elapsed)', (c) => (arr(c.marks)[0] ? markText(arr(c.marks)[0].elapsed) : '')],
+			[
+				'last_split',
+				'newest mark split (since the one before)',
+				(c) => (arr(c.marks)[0] ? markText(arr(c.marks)[0].split) : ''),
+			],
+			['mark_1', 'mark 1 (newest)', (c) => markLine(c, 0)],
+			['mark_2', 'mark 2', (c) => markLine(c, 1)],
+			['mark_3', 'mark 3', (c) => markLine(c, 2)],
+			['mark_4', 'mark 4', (c) => markLine(c, 3)],
+			['mark_5', 'mark 5 (oldest shown)', (c) => markLine(c, 4)],
+		],
+		(c) => !!c.stopwatch,
 	],
 	[
 		'cuestack',
@@ -276,8 +313,9 @@ function initVariables(self) {
 			defs.push({ variableId: `timer_${n}_${suffix}`, name: `Timer ${n}: ${name}` })
 	})
 
-	for (const [prefix, key, keyOf, vars] of ENTITY_VARS) {
+	for (const [prefix, key, keyOf, vars, only] of ENTITY_VARS) {
 		for (const x of arr(self.state[key])) {
+			if (only && !only(x)) continue
 			const k = sanitize(keyOf(x))
 			const who = x.name || keyOf(x)
 			for (const [suffix, name] of vars) defs.push({ variableId: `${prefix}_${k}_${suffix}`, name: `${who}: ${name}` })
@@ -302,8 +340,9 @@ function updateVariables(self) {
 		for (const [suffix, , value] of TIMER_VARS) values[`timer_${i + 1}_${suffix}`] = value(c)
 	})
 
-	for (const [prefix, key, keyOf, vars] of ENTITY_VARS) {
+	for (const [prefix, key, keyOf, vars, only] of ENTITY_VARS) {
 		for (const x of arr(self.state[key])) {
+			if (only && !only(x)) continue
 			const k = sanitize(keyOf(x))
 			for (const [suffix, , value] of vars) values[`${prefix}_${k}_${suffix}`] = value(x)
 		}
