@@ -73,7 +73,8 @@ class CadenceInstance extends InstanceBase {
 			if (!res.ok) return this.pollFailed(describeFailure(this.config, { httpStatus: res.status }))
 			this.handleStateReply(await res.json())
 		} catch (e) {
-			if (current()) this.pollFailed(e.name === 'AbortError' ? 'timeout' : e.message)
+			if (current())
+				this.pollFailed(describeFailure(this.config, { network: e.name === 'AbortError' ? 'timeout' : e.message }))
 		} finally {
 			this.polling = false
 			if (this.repoll) this.poll()

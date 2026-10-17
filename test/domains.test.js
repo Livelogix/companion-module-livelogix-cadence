@@ -227,6 +227,7 @@ test('presets reference only real actions, feedbacks and variables', () => {
 	const names = Object.keys(self._presets)
 	assert.ok(names.length > 30, `built ${names.length} presets`)
 	for (const [id, p] of Object.entries(self._presets)) {
+		if (p.type === 'text') continue // a note in the Presets panel: no actions, feedbacks or style
 		for (const step of p.steps)
 			for (const a of step.down) assert.ok(a.actionId in self._actions, `${id}: action ${a.actionId}`)
 		for (const f of p.feedbacks) assert.ok(f.feedbackId in self._feedbacks, `${id}: feedback ${f.feedbackId}`)

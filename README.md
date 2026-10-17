@@ -1,6 +1,14 @@
 # companion-module-livelogix-cadence
 
-A [Bitfocus Companion](https://bitfocus.io/companion) module for **LiveLogix Cadence**: timers, presets, schedules, cue stacks, polls, messages, scenes, automations and cue lights, with live time, status and tally feedback.
+A [Bitfocus Companion](https://bitfocus.io/companion) module for **[LiveLogix Cadence](https://cadence.livelogix.app)**: timers, presets, schedules, cue stacks, polls, messages, scenes, automations and cue lights, with live time, status and tally feedback.
+
+## About Cadence
+
+[Cadence](https://cadence.livelogix.app) is the countdown clock and show timer for Mac. One synced engine drives displays, the web, NDI®, SDI, vMix, wall clocks and the cloud, with audience polls (phones vote by QR code, results live on screen), run-of-show schedules from a live Google Sheet, Planning Center Services LIVE, and remote producer pages. It's in **free beta** with everything unlocked: [get a beta key](https://cadence.livelogix.app/#get).
+
+Guides: [NDI® countdown timer](https://cadence.livelogix.app/ndi-countdown-timer/) · [SDI clock with DeckLink](https://cadence.livelogix.app/sdi-decklink-clock-mac/) · [ProPresenter countdown](https://cadence.livelogix.app/propresenter-countdown/) · [OBS & vMix countdown timer](https://cadence.livelogix.app/obs-countdown-timer/) · [Synced show clocks](https://cadence.livelogix.app/synced-clocks/) · [Planning Center countdown](https://cadence.livelogix.app/planning-center-countdown/)
+
+## How the module works
 
 It talks to a Cadence **Producer server** over the LAN: `GET /api/state` for a live snapshot (polled) and `POST /api/command` to drive it. That's the same HTTP surface Cadence's own Producer web page uses (`AppModel.producerHandleCommand` in the Cadence app is the wire reference).
 

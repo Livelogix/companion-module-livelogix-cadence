@@ -210,5 +210,5 @@ test('stopwatch: Mark action, choices, variables, preset', async () => {
 	assert.equal(v.stopwatch_timer_b_mark_3, '1 · 1:00.0 (+1:00.0)')
 	assert.equal(v.stopwatch_timer_b_mark_4, '')
 	assert.ok(!('stopwatch_timer_a_last' in v), 'only stopwatches get the marks variables')
-	assert.ok(Object.values(self._presets).some((p) => p.steps[0].down[0]?.actionId === 'stopwatch_mark'))
+	assert.ok(Object.values(self._presets).some((p) => p.steps?.[0].down[0]?.actionId === 'stopwatch_mark'))
 })

@@ -130,7 +130,7 @@ function endpoints(config) {
 }
 
 // Turn a failed state pull into an operator-actionable message + status.
-function describeFailure(config, { httpStatus, error } = {}) {
+function describeFailure(config, { httpStatus, error, network } = {}) {
 	if (httpStatus === 404 && config?.scope !== 'page') {
 		return {
 			status: Status.BadConfig,
@@ -139,7 +139,12 @@ function describeFailure(config, { httpStatus, error } = {}) {
 		}
 	}
 	if (error) return { status: Status.BadConfig, message: error } // Cadence refused (e.g. switched off)
-	return { status: Status.ConnectionFailure, message: httpStatus ? `HTTP ${httpStatus}` : 'no response' }
+	if (httpStatus) return { status: Status.ConnectionFailure, message: `HTTP ${httpStatus}` }
+	const where = config?.host ? ` at ${config.host}:${config.port || 8730}` : ''
+	return {
+		status: Status.ConnectionFailure,
+		message: `No response from Cadence${where}${network ? ` (${network})` : ''}. Is Cadence open on that Mac? Don't have it yet? cadence.livelogix.app`,
+	}
 }
 
 const methods = {

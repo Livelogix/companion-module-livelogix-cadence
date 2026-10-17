@@ -29,6 +29,9 @@ function setPresets(self) {
 		feedbacks,
 	})
 	const act = (actionId, options) => ({ actionId, options })
+	// A line of text in the Presets panel: what a Cadence feature does, and where to read more.
+	const text = (category, name, body) => ({ type: 'text', category, name, text: body })
+	const SITE = 'https://cadence.livelogix.app'
 	// Fixed sizes measured on a 72 px key: 14 ≈ 5 capitals / 6 digits per line,
 	// 18 ≈ 4–5 characters.
 	const SIZE = { small: '14', medium: '18' }
@@ -117,6 +120,11 @@ function setPresets(self) {
 	for (const s of self.state.schedules) {
 		const cat = `Schedule: ${s.name || s.id}`
 		const k = key(s.id)
+		presets[`sched_${k}_about`] = text(
+			cat,
+			'Run of show',
+			`Cadence runs the schedule you already have (a live Google Sheet, Excel or CSV) cue by cue, with ahead / behind and a projected end time. More: ${SITE}/#schedule`,
+		)
 		presets[`sched_${k}_setstart`] = button(
 			cat,
 			'Set & Start on-deck cue',
@@ -262,6 +270,11 @@ function setPresets(self) {
 	for (const p of self.state.polls) {
 		const cat = `Poll: ${p.name || p.id}`
 		const k = key(p.id)
+		presets[`poll_${k}_about`] = text(
+			cat,
+			'Audience polls',
+			`The audience votes from their phones (scan a QR code or type a short link, no app to install) and results build live on every output Cadence drives: bars, donuts, leaderboards, word and bubble clouds. More: ${SITE}/#polls`,
+		)
 		presets[`poll_${k}_open`] = button(
 			cat,
 			'Open / Close voting',
@@ -468,6 +481,11 @@ function setPresets(self) {
 	}
 
 	// ---- Status ----------------------------------------------------------------------------------
+	presets['about'] = text(
+		'Status',
+		'About Cadence',
+		`Cadence is the countdown clock and show timer for Mac: one synced engine for displays, the web, NDI, SDI, vMix and wall clocks, with audience polls, run-of-show schedules and remote producer pages. Free beta, everything unlocked: ${SITE}`,
+	)
 	presets['status'] = button(
 		'Status',
 		'Cadence connection + clock status',

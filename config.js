@@ -4,6 +4,14 @@ function GetConfigFields() {
 	return [
 		{
 			type: 'static-text',
+			id: 'cadence',
+			width: 12,
+			label: 'LiveLogix Cadence',
+			value:
+				'Cadence is the countdown clock and show timer for Mac: design a clock once and show it on displays, the web, NDI, SDI, vMix and wall clocks, all on one synced time, plus audience polls, run-of-show schedules from a Google Sheet, and Planning Center Services LIVE. Free beta, everything unlocked: https://cadence.livelogix.app',
+		},
+		{
+			type: 'static-text',
 			id: 'info',
 			width: 12,
 			label: 'About',
